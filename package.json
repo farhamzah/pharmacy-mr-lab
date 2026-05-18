@@ -1,0 +1,30 @@
+{
+  "name": "pharmacy-mr-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc && vite build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "node scripts/run-e2e.mjs",
+    "test:e2e:headed": "node scripts/run-e2e.mjs --headed",
+    "check": "npm run typecheck && npm run test && npm run build",
+    "check:e2e": "npm run build && npm run test:e2e",
+    "check:full": "npm run check && npm run test:e2e",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "three": "^0.164.1",
+    "vite": "^5.2.11"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/three": "^0.164.0",
+    "jsdom": "^29.1.1",
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.6"
+  }
+}

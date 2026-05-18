@@ -1,0 +1,51 @@
+import * as THREE from "three";
+import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory.js";
+
+type SelectHandler = () => void;
+
+export class ControllerManager {
+  private readonly controllers: THREE.Group[] = [];
+  private readonly grips: THREE.Group[] = [];
+  private onSelect: SelectHandler = () => undefined;
+
+  constructor(private readonly renderer: THREE.WebGLRenderer, private readonly scene: THREE.Scene) {}
+
+  initialize(): void {
+    const modelFactory = new XRControllerModelFactory();
+    for (let index = 0; index < 2; index += 1) {
+      const controller = this.renderer.xr.getController(index);
+      controller.addEventListener("select", () => this.onSelect());
+      controller.add(this.createPointerLine());
+      this.scene.add(controller);
+      this.controllers.push(controller);
+
+      const grip = this.renderer.xr.getControllerGrip(index);
+      grip.add(modelFactory.createControllerModel(grip));
+      this.scene.add(grip);
+      this.grips.push(grip);
+    }
+  }
+
+  setSelectHandler(handler: SelectHandler): void {
+    this.onSelect = handler;
+  }
+
+  dispose(): void {
+    this.controllers.forEach((controller) => this.scene.remove(controller));
+    this.grips.forEach((grip) => this.scene.remove(grip));
+    this.controllers.length = 0;
+    this.grips.length = 0;
+  }
+
+  private createPointerLine(): THREE.Line {
+    const geometry = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0, 0, -1),
+    ]);
+    const material = new THREE.LineBasicMaterial({ color: 0x67e8f9 });
+    const line = new THREE.Line(geometry, material);
+    line.name = "controller-pointer";
+    line.scale.z = 2;
+    return line;
+  }
+}
