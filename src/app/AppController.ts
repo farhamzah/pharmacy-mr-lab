@@ -18,7 +18,7 @@ import { WeighingModule } from "../modules/WeighingModule";
 import { PerformanceMonitor } from "../performance/PerformanceMonitor";
 import { UIManager } from "../ui/UIManager";
 import { getMixingScenario, getWeighingScenario, mixingScenarios, weighingScenarios } from "../data/practicalScenarios";
-import { DEBUG_PERFORMANCE, MAX_TABLES, ModuleId } from "../utils/constants";
+import { DEBUG_PERFORMANCE, ModuleId } from "../utils/constants";
 import { clearResultHistory, clearRoomSetup, createRoomSetupRecord, deleteRoomSetupRecord, loadCurrentRoomSetupRecord, saveRoomSetupRecord } from "../utils/storage";
 import { StateManager } from "./StateManager";
 import { XRSessionManager } from "./XRSessionManager";
@@ -47,6 +47,7 @@ export class AppController {
   private lastDiagnostics: DiagnosticReport | null = null;
   private pendingModuleId: ModuleId | null = null;
   private lastXRInputAt = 0;
+  private placementStep: "select-table" | "place-scale" = "select-table";
 
   constructor(private readonly root: HTMLElement) {
     this.ui = new UIManager(root, {
@@ -117,9 +118,10 @@ export class AppController {
       this.activeModule = null;
       this.placementManager.clear();
       this.state.setTables([]);
+      this.placementStep = "select-table";
       this.state.setMode("placement");
       this.ui.showPlacement(0);
-      this.ui.setMessage("Arahkan lingkaran/reticle ke permukaan meja, lalu tekan trigger controller untuk menyimpan meja.");
+      this.ui.setMessage("Pilih meja kerja dulu. Arahkan controller ke meja, lalu tekan trigger.");
     } catch (error) {
       this.ui.setMessage(error instanceof Error ? error.message : "Gagal memulai WebXR.", "error");
     }
@@ -149,17 +151,24 @@ export class AppController {
     if (this.state.mode !== "placement") return;
     if (now - this.lastXRInputAt < 180) return;
     this.lastXRInputAt = now;
-    this.ui.setMessage("Input controller diterima. Mencari permukaan meja dari posisi reticle...", "info");
-    const table = await this.placementManager.placeTableFromReticle();
-    if (!table) {
-      this.ui.setMessage(`Reticle belum menemukan permukaan meja atau jumlah meja sudah maksimal (${MAX_TABLES}).`, "error");
+    if (this.placementStep === "select-table") {
+      this.ui.setMessage("Input controller diterima. Mencari permukaan meja...", "info");
+      const table = await this.placementManager.placeTableFromReticle();
+      if (!table) {
+        this.ui.setMessage("Reticle belum menemukan permukaan meja.", "error");
+        return;
+      }
+
+      const tables = this.layout.assignRoles(this.placementManager.getTables());
+      this.state.setTables(tables);
+      this.placementStep = "place-scale";
+      this.ui.showPlacement(tables.length);
+      this.ui.setMessage(`${table.id.replace("table-", "Meja ")} dipilih. Sekarang arahkan ke meja itu lagi, lalu trigger untuk meletakkan timbangan.`, "success");
       return;
     }
 
-    const tables = this.layout.assignRoles(this.placementManager.getTables());
-    this.state.setTables(tables);
-    this.ui.showPlacement(tables.length);
-    this.ui.setMessage(`${table.id.replace("table-", "Meja ")} tersimpan di posisi reticle. Tambah meja lain atau tekan Selesai Setup.`, "success");
+    this.ui.setMessage("Timbangan diletakkan di meja. Mulai prosedur penimbangan.", "success");
+    this.startModule("weighing");
   }
 
   private attachSessionInputFallback(session: XRSession): void {
