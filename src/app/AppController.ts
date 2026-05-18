@@ -108,7 +108,7 @@ export class AppController {
       const session = await this.xrSessionManager.startSession();
       this.ui.showXROverlay();
       this.controllerManager.initialize();
-      this.controllerManager.setSelectHandler(() => void this.handleSelect());
+      this.controllerManager.setSelectHandler((controller) => void this.handleSelect(controller));
       await this.hitTestManager.initialize(session);
 
       const persistedTables = this.state.loadPersistedTables();
@@ -122,13 +122,17 @@ export class AppController {
 
       this.state.setMode("placement");
       this.ui.showPlacement(0);
-      this.ui.setMessage("Mode placement aktif. Tandai 1 sampai 3 meja.");
+      this.ui.setMessage("Mode placement aktif. Tandai meja pertama, lalu bisa langsung pilih modul atau tambah meja opsional.");
     } catch (error) {
       this.ui.setMessage(error instanceof Error ? error.message : "Gagal memulai WebXR.", "error");
     }
   }
 
-  private async handleSelect(): Promise<void> {
+  private async handleSelect(controller?: THREE.Object3D): Promise<void> {
+    if (this.state.mode === "module-running" && controller && this.activeModule?.handleObjectSelect(controller)) {
+      return;
+    }
+
     if (this.state.mode !== "placement") return;
     const table = await this.placementManager.placeTableFromReticle();
     if (!table) {
@@ -139,7 +143,7 @@ export class AppController {
     const tables = this.layout.assignRoles(this.placementManager.getTables());
     this.state.setTables(tables);
     this.ui.showPlacement(tables.length);
-    this.ui.setMessage(`${table.id.replace("table-", "Meja ")} ditandai.`);
+    this.ui.setMessage(`${table.id.replace("table-", "Meja ")} ditandai. Kamu boleh selesai sekarang atau tambah meja lagi.`);
 
     if (tables.length === MAX_TABLES) {
       this.finishSetup();

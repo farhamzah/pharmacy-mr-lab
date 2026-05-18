@@ -67,3 +67,34 @@ export function animateError(object?: THREE.Object3D): void {
     object.position.x = baseX;
   });
 }
+
+export function animatePowderTransfer(parent: THREE.Object3D, from: THREE.Vector3, to: THREE.Vector3, material: THREE.Material): void {
+  const stream = new THREE.Group();
+  stream.name = "powder-transfer-animation";
+  const particles = Array.from({ length: 10 }, (_, index) => {
+    const particle = new THREE.Mesh(new THREE.SphereGeometry(0.006 + (index % 3) * 0.0015, 8, 6), material);
+    particle.position.copy(from);
+    stream.add(particle);
+    return particle;
+  });
+  parent.add(stream);
+
+  run(620, (progress) => {
+    particles.forEach((particle, index) => {
+      const delay = index * 0.035;
+      const localProgress = Math.max(0, Math.min(1, (progress - delay) / 0.65));
+      const arc = Math.sin(localProgress * Math.PI) * 0.12;
+      particle.position.lerpVectors(from, to, localProgress);
+      particle.position.y += arc;
+      particle.visible = localProgress > 0 && localProgress < 1;
+    });
+  }, () => {
+    parent.remove(stream);
+    stream.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        child.geometry.dispose();
+      }
+    });
+    stream.clear();
+  });
+}

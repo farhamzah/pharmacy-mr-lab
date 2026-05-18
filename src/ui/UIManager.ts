@@ -201,12 +201,20 @@ export class UIManager {
   }
 
   showPlacement(tableCount: number): void {
+    const ready = tableCount > 0;
     this.instructionPanel?.setContent("Setup Meja", [
-      "Arahkan controller ke permukaan meja, lalu tekan trigger untuk menandai meja.",
-      `Meja ditandai: ${tableCount}/3.`,
+      ready
+        ? "Meja sudah ditandai. Tekan tombol selesai untuk langsung memilih modul, atau arahkan controller ke meja lain lalu trigger untuk tambah meja opsional."
+        : "Arahkan controller ke permukaan meja pertama, lalu tekan trigger. Cukup 1 meja untuk mulai demo.",
+      `Meja ditandai: ${tableCount}/3. 1 meja = shared workbench, 2 meja = penimbangan + pencampuran, 3 meja = material + penimbangan + pencampuran.`,
     ]);
     if (this.actionEl) {
-      this.actionEl.innerHTML = `<button id="finish-setup" class="primary">Selesai Setup</button>`;
+      this.actionEl.innerHTML = `
+        <button id="finish-setup" class="primary" ${ready ? "" : "disabled"}>
+          ${ready ? `Gunakan ${tableCount} Meja & Pilih Modul` : "Tandai Meja Dulu"}
+        </button>
+        <span class="action-hint">Trigger controller = tambah meja opsional</span>
+      `;
       this.actionEl.querySelector("#finish-setup")?.addEventListener("click", this.handlers.onFinishSetup);
     }
   }
@@ -215,7 +223,7 @@ export class UIManager {
     this.hideResult();
     if (this.progressEl) this.progressEl.innerHTML = "";
     this.instructionPanel?.setContent("Pilih Modul", [
-      "Pilih modul praktikum awal untuk ditempatkan pada meja yang sudah dikonfigurasi.",
+      "Pilih modul. Setelah modul muncul, kamu bisa memakai tombol menu atau trigger langsung pada objek 3D yang menyala.",
     ]);
     if (this.actionEl) {
       this.actionEl.innerHTML = `
@@ -229,7 +237,7 @@ export class UIManager {
 
   showScenarioSelection(moduleId: ModuleId, scenarios: Array<WeighingScenario | MixingScenario>): void {
     this.instructionPanel?.setContent(moduleId === "weighing" ? "Pilih Skenario Penimbangan" : "Pilih Skenario Pencampuran", [
-      "Pilih skenario praktikum sebelum memulai modul.",
+      "Pilih skenario praktikum. Di Quest, interaksi utama bisa dilakukan dengan trigger pada alat dan bahan yang diberi hotspot biru.",
     ]);
     if (this.progressEl) this.progressEl.innerHTML = "";
     if (this.actionEl) {

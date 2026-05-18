@@ -2,8 +2,9 @@ import * as THREE from "three";
 import { RubricEvaluator } from "../assessment/RubricEvaluator";
 import { ScoreManager } from "../assessment/ScoreManager";
 import { getWeighingScenario, WeighingScenario } from "../data/practicalScenarios";
-import { animateError, animatePowderAdded, animateScaleReading, animateSuccess } from "../lab/LabAnimations";
+import { animateError, animatePowderAdded, animatePowderTransfer, animateScaleReading, animateSuccess } from "../lab/LabAnimations";
 import { InteractionFeedback } from "../interactions/InteractionFeedback";
+import { LabMaterials } from "../lab/LabMaterials";
 import { saveModuleResult } from "../utils/storage";
 import { formatGram, randomRange } from "../utils/numberFormat";
 import { BaseModule } from "./BaseModule";
@@ -44,7 +45,9 @@ export class WeighingModule extends BaseModule {
     this.scaleGroup = scale;
     const bottle = await this.factory.createIngredientBottleAsync({ label: this.scenario.materialName, color: 0xfbbf24 });
     bottle.position.set(-0.34, 0, -0.02);
+    this.markInteractive(bottle, "Add Small Sample");
     scale.add(bottle);
+    this.installScaleInteractions(scale);
     this.placeOnTable(scale, table, new THREE.Vector3(0, 0.02, 0));
     this.renderPanel();
   }
@@ -53,6 +56,12 @@ export class WeighingModule extends BaseModule {
     this.actionHistory.push(action);
 
     if (action === "Place Weighing Boat") {
+      if (this.hasWeighingBoat) {
+        this.lastFeedback = "Weighing boat sudah ada. Trigger botol untuk menambah sampel.";
+        this.feedback.info(this.lastFeedback);
+        this.renderPanel();
+        return;
+      }
       this.hasWeighingBoat = true;
       this.lastFeedback = "Weighing boat diletakkan.";
       void this.showWeighingBoat();
@@ -80,6 +89,7 @@ export class WeighingModule extends BaseModule {
       if (!this.ensureTared()) return;
       this.sampleMassGram += randomRange(0.001, 0.01);
       this.lastFeedback = `Sampel kecil ditambahkan. Massa ${formatGram(this.sampleMassGram)}.`;
+      this.animateSamplePour();
       this.updateDisplay();
       this.updateMassStatus();
       this.feedback.info(this.lastFeedback);
@@ -90,6 +100,7 @@ export class WeighingModule extends BaseModule {
       if (!this.ensureTared()) return;
       this.sampleMassGram += randomRange(0.025, 0.075);
       this.lastFeedback = `Sampel besar ditambahkan. Massa ${formatGram(this.sampleMassGram)}.`;
+      this.animateSamplePour(true);
       this.updateDisplay();
       this.updateMassStatus();
       this.feedback.info(this.lastFeedback);
@@ -147,7 +158,7 @@ export class WeighingModule extends BaseModule {
       this.scenario.moduleName,
       `${this.scenario.materialName} ${formatGram(this.scenario.targetMassGram)} toleransi +/- ${formatGram(this.scenario.toleranceGram)}`,
       currentStep?.description ?? "Prosedur selesai.",
-      `${this.lastFeedback} Massa: ${formatGram(this.sampleMassGram)}`,
+      `${this.lastFeedback} Massa: ${formatGram(this.sampleMassGram)}. Quest: trigger plate untuk boat, tombol TARE untuk zero, botol untuk tambah sampel, boat untuk kurangi, display untuk confirm.`,
       ["Place Weighing Boat", "Tare / Zero", "Add Small Sample", "Add Large Sample", "Remove Small Sample", "Confirm Mass", "Finish"],
       this.steps,
     );
@@ -217,8 +228,11 @@ export class WeighingModule extends BaseModule {
 
   private async showWeighingBoat(): Promise<void> {
     if (!this.scaleGroup || this.weighingBoat) return;
+    const plateHotspot = this.scaleGroup.getObjectByName("place-boat-hotspot");
+    if (plateHotspot) this.scaleGroup.remove(plateHotspot);
     this.weighingBoat = await this.factory.createWeighingBoatAsync();
     this.weighingBoat.position.set(0, 0.155, 0);
+    this.markInteractive(this.weighingBoat, "Remove Small Sample");
     this.scaleGroup.add(this.weighingBoat);
   }
 
@@ -241,6 +255,27 @@ export class WeighingModule extends BaseModule {
     animatePowderAdded(this.powder);
   }
 
+  private installScaleInteractions(scale: THREE.Group): void {
+    const plateHotspot = this.createInteractionHotspot("place-boat-hotspot", "Place Weighing Boat", 0.105);
+    plateHotspot.scale.set(1.2, 0.22, 1.2);
+    plateHotspot.position.set(0, 0.18, 0);
+    scale.add(plateHotspot);
+
+    const tareButton = scale.getObjectByName("tare-button");
+    if (tareButton) this.markInteractive(tareButton, "Tare / Zero");
+
+    const display = scale.getObjectByName("scale-display-text");
+    if (display) this.markInteractive(display, "Confirm Mass");
+
+    const finishHotspot = this.createInteractionHotspot("finish-weighing-hotspot", "Finish", 0.065);
+    finishHotspot.position.set(0.24, 0.18, 0.18);
+    scale.add(finishHotspot);
+
+    const finishLabel = this.factory.createSpriteLabel("Finish", 0.12, 0.045);
+    finishLabel.position.set(0.24, 0.25, 0.18);
+    scale.add(finishLabel);
+  }
+
   private updateMassStatus(): void {
     const diff = this.sampleMassGram - this.scenario.targetMassGram;
     if (Math.abs(diff) <= this.scenario.toleranceGram) {
@@ -250,6 +285,17 @@ export class WeighingModule extends BaseModule {
     } else {
       this.showStatus("Terlalu banyak", "error");
     }
+  }
+
+  private animateSamplePour(large = false): void {
+    if (!this.scaleGroup) return;
+    animatePowderTransfer(
+      this.scaleGroup,
+      new THREE.Vector3(-0.34, 0.28, -0.02),
+      new THREE.Vector3(0, 0.2, 0),
+      LabMaterials.powderLightYellow,
+    );
+    if (large) animateSuccess(this.scaleGroup.getObjectByName(`${this.scenario.materialName} Bottle`));
   }
 
   private showStatus(text: string, status: "success" | "warning" | "error" | "info"): void {

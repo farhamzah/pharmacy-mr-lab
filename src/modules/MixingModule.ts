@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { RubricEvaluator } from "../assessment/RubricEvaluator";
 import { ScoreManager } from "../assessment/ScoreManager";
 import { getMixingScenario, MixingScenario } from "../data/practicalScenarios";
-import { animateError, animateMixing, animatePowderAdded, animateSuccess } from "../lab/LabAnimations";
+import { animateError, animateMixing, animatePowderAdded, animatePowderTransfer, animateSuccess } from "../lab/LabAnimations";
 import { InteractionFeedback } from "../interactions/InteractionFeedback";
 import { LabMaterials } from "../lab/LabMaterials";
 import { saveModuleResult } from "../utils/storage";
@@ -46,8 +46,15 @@ export class MixingModule extends BaseModule {
 
     const set = await this.factory.createMortarAndPestleAsync();
     this.mortarSet = set;
-    set.add((await this.factory.createIngredientBottleAsync({ label: this.scenario.ingredientA, color: 0x86efac })).translateX(-0.36));
-    set.add((await this.factory.createIngredientBottleAsync({ label: this.scenario.ingredientB, color: 0xfca5a5 })).translateX(0.36));
+    const bottleA = await this.factory.createIngredientBottleAsync({ label: this.scenario.ingredientA, color: 0x86efac });
+    bottleA.translateX(-0.36);
+    this.markInteractive(bottleA, "Add Ingredient A");
+    set.add(bottleA);
+
+    const bottleB = await this.factory.createIngredientBottleAsync({ label: this.scenario.ingredientB, color: 0xfca5a5 });
+    bottleB.translateX(0.36);
+    this.markInteractive(bottleB, "Add Ingredient B");
+    set.add(bottleB);
 
     this.homogeneityLabel = this.factory.createSpriteLabel("Homogeneity: 0%", 0.34, 0.075);
     this.homogeneityLabel.position.set(0, 0.34, -0.22);
@@ -56,7 +63,10 @@ export class MixingModule extends BaseModule {
     this.finalContainer = await this.factory.createFinalContainerAsync({ amountNormalized: 0.8 });
     this.finalContainer.position.set(0.42, 0, 0);
     this.finalContainer.visible = false;
+    this.markInteractive(this.finalContainer, "Finish");
     set.add(this.finalContainer);
+
+    this.installMortarInteractions(set);
 
     this.placeOnTable(set, table, new THREE.Vector3(0, 0.02, 0));
     this.renderPanel();
@@ -70,6 +80,7 @@ export class MixingModule extends BaseModule {
       this.ingredientOrder.push("A");
       this.completeStep("addIngredientA");
       this.lastFeedback = "Ingredient A ditambahkan.";
+      this.animateIngredientPour("A");
       this.updatePowder("yellow");
       this.showStatus("A masuk", "success");
       this.feedback.success(this.lastFeedback);
@@ -80,6 +91,7 @@ export class MixingModule extends BaseModule {
       this.ingredientOrder.push("B");
       this.completeStep("addIngredientB");
       this.lastFeedback = "Ingredient B ditambahkan.";
+      this.animateIngredientPour("B");
       this.updatePowder("white");
       this.showStatus("B masuk", "success");
       this.feedback.success(this.lastFeedback);
@@ -110,6 +122,9 @@ export class MixingModule extends BaseModule {
       this.completeStep("transferToContainer");
       this.lastFeedback = "Campuran dipindahkan ke wadah akhir.";
       this.showStatus("Transfer", "success");
+      if (this.mortarSet) {
+        animatePowderTransfer(this.mortarSet, new THREE.Vector3(0, 0.15, 0), new THREE.Vector3(0.42, 0.12, 0), LabMaterials.powderMixed);
+      }
       animateSuccess(this.finalContainer);
       this.feedback.success(this.lastFeedback);
     }
@@ -136,7 +151,7 @@ export class MixingModule extends BaseModule {
       this.scenario.moduleName,
       `${this.scenario.ingredientA} + ${this.scenario.ingredientB}, homogenitas minimal ${this.scenario.requiredHomogeneity}%`,
       currentStep?.description ?? "Prosedur selesai.",
-      `${this.lastFeedback} Homogenitas: ${formatPercent(this.homogeneity)}`,
+      `${this.lastFeedback} Homogenitas: ${formatPercent(this.homogeneity)}. Quest: trigger botol bahan, mortar/pestle untuk mix, badge transfer untuk wadah akhir.`,
       ["Add Ingredient A", "Add Ingredient B", "Mix 5 Seconds", "Transfer To Container", "Finish"],
       this.steps,
     );
@@ -231,5 +246,35 @@ export class MixingModule extends BaseModule {
     this.statusBadge = this.factory.createStatusBadge(text, status);
     this.statusBadge.position.set(0.2, 0.31, 0.08);
     this.mortarSet.add(this.statusBadge);
+  }
+
+  private installMortarInteractions(set: THREE.Group): void {
+    const mortar = set.getObjectByName("mortar-bowl");
+    const pestle = set.getObjectByName("pestle");
+    if (mortar) this.markInteractive(mortar, "Mix 5 Seconds");
+    if (pestle) this.markInteractive(pestle, "Mix 5 Seconds");
+
+    const mixHotspot = this.createInteractionHotspot("mix-hotspot", "Mix 5 Seconds", 0.12);
+    mixHotspot.scale.set(1.2, 0.45, 1.2);
+    mixHotspot.position.set(0, 0.19, 0);
+    set.add(mixHotspot);
+
+    const transferHotspot = this.createInteractionHotspot("transfer-hotspot", "Transfer To Container", 0.07);
+    transferHotspot.position.set(0.27, 0.18, 0.03);
+    set.add(transferHotspot);
+
+    const transferLabel = this.factory.createSpriteLabel("Transfer", 0.15, 0.045);
+    transferLabel.position.set(0.27, 0.255, 0.03);
+    set.add(transferLabel);
+  }
+
+  private animateIngredientPour(ingredient: "A" | "B"): void {
+    if (!this.mortarSet) return;
+    animatePowderTransfer(
+      this.mortarSet,
+      ingredient === "A" ? new THREE.Vector3(-0.36, 0.28, 0) : new THREE.Vector3(0.36, 0.28, 0),
+      new THREE.Vector3(0, 0.16, 0),
+      ingredient === "A" ? LabMaterials.powderLightYellow : LabMaterials.powderWhite,
+    );
   }
 }

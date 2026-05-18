@@ -30,6 +30,11 @@ button {
   font-size: 0.98rem;
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 button.primary {
   color: #062025;
   border-color: rgba(34, 211, 238, 0.85);
@@ -91,6 +96,14 @@ h2 {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.action-hint {
+  align-self: center;
+  max-width: 280px;
+  color: #bae6fd;
+  font-size: 0.92rem;
+  line-height: 1.35;
 }
 
 .scale-picker {

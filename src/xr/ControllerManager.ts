@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { XRControllerModelFactory } from "three/examples/jsm/webxr/XRControllerModelFactory.js";
 
-type SelectHandler = () => void;
+type SelectHandler = (controller: THREE.Group) => void;
 
 export class ControllerManager {
   private readonly controllers: THREE.Group[] = [];
@@ -14,7 +14,7 @@ export class ControllerManager {
     const modelFactory = new XRControllerModelFactory();
     for (let index = 0; index < 2; index += 1) {
       const controller = this.renderer.xr.getController(index);
-      controller.addEventListener("select", () => this.onSelect());
+      controller.addEventListener("select", () => this.onSelect(controller));
       controller.add(this.createPointerLine());
       this.scene.add(controller);
       this.controllers.push(controller);
@@ -28,6 +28,10 @@ export class ControllerManager {
 
   setSelectHandler(handler: SelectHandler): void {
     this.onSelect = handler;
+  }
+
+  getPrimaryController(): THREE.Group | undefined {
+    return this.controllers[0];
   }
 
   dispose(): void {
