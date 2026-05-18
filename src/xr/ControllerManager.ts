@@ -8,6 +8,7 @@ export class ControllerManager {
   private readonly grips: THREE.Group[] = [];
   private onSelect: SelectHandler = () => undefined;
   private lastSelectAt = 0;
+  private readonly pressedSources = new WeakSet<XRInputSource>();
 
   constructor(private readonly renderer: THREE.WebGLRenderer, private readonly scene: THREE.Scene) {}
 
@@ -40,6 +41,22 @@ export class ControllerManager {
 
   getPrimaryController(): THREE.Group | undefined {
     return this.controllers[0];
+  }
+
+  updateFromSession(session: XRSession | null): void {
+    if (!session) return;
+    Array.from(session.inputSources).forEach((source, index) => {
+      const gamepad = source.gamepad;
+      if (!gamepad) return;
+      const isPressed = gamepad.buttons.some((button) => button.pressed || button.value > 0.65);
+      if (!isPressed) {
+        this.pressedSources.delete(source);
+        return;
+      }
+      if (this.pressedSources.has(source)) return;
+      this.pressedSources.add(source);
+      this.triggerSelect(this.controllers[index] ?? this.controllers[0]);
+    });
   }
 
   dispose(): void {
