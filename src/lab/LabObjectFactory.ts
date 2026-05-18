@@ -91,7 +91,7 @@ export class LabObjectFactory {
     screenGlow.material.opacity = 0.18;
     group.add(screenGlow);
 
-    const tareButton = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.014, 32), LabMaterials.hologramBlue);
+    const tareButton = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.014, 32), LabMaterials.successGreen);
     tareButton.name = "tare-button";
     tareButton.rotation.x = Math.PI / 2;
     tareButton.position.set(0.205, 0.118, 0.222);
@@ -231,9 +231,11 @@ export class LabObjectFactory {
     foldLine.position.y = 0.036;
     group.add(foldLine);
 
-    const label = createTextSprite("Boat", { width: 0.13, height: 0.045, fontSize: 32 });
-    label.position.set(0, 0.075, 0.09);
-    group.add(label);
+    const spout = new THREE.Mesh(new THREE.ConeGeometry(0.028, 0.055, 4), LabMaterials.plasticWhite);
+    spout.name = "weighing-boat-pour-spout";
+    spout.rotation.set(Math.PI / 2, 0, Math.PI / 4);
+    spout.position.set(0.115, 0.032, 0);
+    group.add(spout);
 
     if ((options.amountNormalized ?? 0) > 0) {
       const powder = this.createPowderMound(options);
@@ -427,29 +429,34 @@ export class LabObjectFactory {
   createFinalContainer(options: PowderOptions = {}): THREE.Group {
     const group = new THREE.Group();
     group.name = "Final Container";
-    const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.066, 0.12, 36, 1, true), LabMaterials.glassTransparent);
+    const cup = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.072, 0.135, 44, 1, true), LabMaterials.glassTransparent);
     cup.name = "final-container-cup";
-    cup.position.y = 0.065;
+    cup.position.y = 0.073;
     group.add(cup);
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.006, 10, 36), LabMaterials.glassTransparent);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.095, 0.007, 10, 44), LabMaterials.glassTransparent);
     rim.name = "final-container-rim";
     rim.rotation.x = Math.PI / 2;
-    rim.position.y = 0.125;
+    rim.position.y = 0.142;
     group.add(rim);
-    const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.087, 0.087, 0.012, 36), LabMaterials.plasticWhite);
+    const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.014, 44), LabMaterials.plasticWhite);
     lid.name = "final-container-lid";
-    lid.position.set(0, 0.153, -0.02);
+    lid.position.set(0, 0.173, -0.02);
     lid.rotation.x = 0.35;
     group.add(lid);
-    const bottom = new THREE.Mesh(new THREE.CylinderGeometry(0.066, 0.066, 0.008, 36), LabMaterials.brushedMetal);
+    const lidGrip = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.034, 0.018, 30), LabMaterials.plasticDark);
+    lidGrip.name = "final-container-lid-grip";
+    lidGrip.position.set(0, 0.19, -0.022);
+    lidGrip.rotation.x = 0.35;
+    group.add(lidGrip);
+    const bottom = new THREE.Mesh(new THREE.CylinderGeometry(0.072, 0.072, 0.008, 44), LabMaterials.brushedMetal);
     bottom.name = "final-container-bottom";
     bottom.position.y = 0.012;
     group.add(bottom);
     const powder = this.createPowderMound({ amountNormalized: options.amountNormalized ?? 0.75, materialType: "mixed" });
     powder.position.y = 0.05;
     group.add(powder);
-    const label = createTextSprite("Final Mix", { width: 0.18, height: 0.055, fontSize: 34 });
-    label.position.set(0, 0.18, 0.08);
+    const label = createTextSprite("Final Mix", { width: 0.2, height: 0.06, fontSize: 34, background: "rgba(255,255,255,0.94)", color: "#0f172a" });
+    label.position.set(0, 0.08, 0.088);
     group.add(label);
     return group;
   }

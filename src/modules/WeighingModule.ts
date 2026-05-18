@@ -26,6 +26,7 @@ export class WeighingModule extends BaseModule {
   private powder?: THREE.Group;
   private statusBadge?: THREE.Sprite;
   private guideBadge?: THREE.Sprite;
+  private targetBadge?: THREE.Sprite;
   private lastFeedback = "";
 
   constructor(scene: ConstructorParameters<typeof BaseModule>[0], tables: ConstructorParameters<typeof BaseModule>[1], layout: ConstructorParameters<typeof BaseModule>[2], factory: ConstructorParameters<typeof BaseModule>[3], ui: ConstructorParameters<typeof BaseModule>[4], scenario?: WeighingScenario, camera?: THREE.Camera) {
@@ -51,7 +52,8 @@ export class WeighingModule extends BaseModule {
     this.installScaleInteractions(scale);
     this.placeOnTable(scale, table, new THREE.Vector3(0, 0.02, 0));
     this.faceObjectToUser(scale);
-    this.showGuide("1. Tekan trigger untuk pasang weighing boat");
+    this.showTargetBadge();
+    this.showGuide("Trigger controller = langkah berikutnya");
     this.renderPanel();
   }
 
@@ -72,7 +74,7 @@ export class WeighingModule extends BaseModule {
       animateSuccess(this.weighingBoat);
       this.feedback.success(this.lastFeedback);
       this.completeStep("placeWeighingBoat");
-    this.showGuide("2. Tekan trigger pada tombol TARE / ZERO");
+      this.showGuide("Target: lanjut tekan trigger untuk TARE / ZERO");
     }
 
     if (action === "Tare / Zero") {
@@ -87,7 +89,7 @@ export class WeighingModule extends BaseModule {
       animateScaleReading(this.scaleGroup?.getObjectByName("scale-display-text"));
       this.feedback.success(this.lastFeedback);
       this.completeStep("tareScale");
-      this.showGuide("3. Trigger botol bahan");
+      this.showGuide(`Target ${formatGram(this.scenario.targetMassGram)}. Trigger untuk tambah sampel`);
     }
 
     if (action === "Add Small Sample") {
@@ -99,7 +101,7 @@ export class WeighingModule extends BaseModule {
       this.updateMassStatus();
       this.feedback.info(this.lastFeedback);
       this.completeStep("addSample");
-      this.showGuide("4. Trigger display besar untuk konfirmasi");
+      this.showGuide(`Target ${formatGram(this.scenario.targetMassGram)}. Trigger untuk konfirmasi massa`);
     }
 
     if (action === "Add Large Sample") {
@@ -111,7 +113,7 @@ export class WeighingModule extends BaseModule {
       this.updateMassStatus();
       this.feedback.info(this.lastFeedback);
       this.completeStep("addSample");
-      this.showGuide("4. Trigger display besar untuk konfirmasi");
+      this.showGuide(`Target ${formatGram(this.scenario.targetMassGram)}. Trigger untuk konfirmasi massa`);
     }
 
     if (action === "Remove Small Sample") {
@@ -141,7 +143,7 @@ export class WeighingModule extends BaseModule {
         animateError(this.scaleGroup);
         this.feedback.error(this.lastFeedback);
       }
-      this.showGuide("5. Trigger lingkaran Finish");
+      this.showGuide("Trigger sekali lagi untuk Finish");
     }
 
     if (action === "Finish") {
@@ -166,7 +168,7 @@ export class WeighingModule extends BaseModule {
       this.scenario.moduleName,
       `${this.scenario.materialName} ${formatGram(this.scenario.targetMassGram)} toleransi +/- ${formatGram(this.scenario.toleranceGram)}`,
       currentStep?.description ?? "Prosedur selesai.",
-      `${this.lastFeedback} Massa: ${formatGram(this.sampleMassGram)}. Gunakan trigger controller mengikuti perintah di atas alat.`,
+      `Target: ${formatGram(this.scenario.targetMassGram)} (+/- ${formatGram(this.scenario.toleranceGram)}). ${this.lastFeedback} Massa saat ini: ${formatGram(this.sampleMassGram)}. Trigger controller menjalankan langkah berikutnya.`,
       ["Place Weighing Boat", "Tare / Zero", "Add Small Sample", "Remove Small Sample", "Confirm Mass", "Finish"],
       this.steps,
     );
@@ -313,6 +315,14 @@ export class WeighingModule extends BaseModule {
     this.guideBadge = this.factory.createStatusBadge(text, "info");
     this.guideBadge.position.set(0, 0.5, 0.02);
     this.scaleGroup.add(this.guideBadge);
+  }
+
+  private showTargetBadge(): void {
+    if (!this.scaleGroup) return;
+    if (this.targetBadge) this.scaleGroup.remove(this.targetBadge);
+    this.targetBadge = this.factory.createStatusBadge(`TARGET ${formatGram(this.scenario.targetMassGram)}  |  TOL +/- ${formatGram(this.scenario.toleranceGram)}`, "success");
+    this.targetBadge.position.set(0, 0.59, 0.02);
+    this.scaleGroup.add(this.targetBadge);
   }
 
   private updateMassStatus(): void {
