@@ -46,7 +46,6 @@ export class AppController {
   private activeModule: BaseModule | null = null;
   private lastDiagnostics: DiagnosticReport | null = null;
   private pendingModuleId: ModuleId | null = null;
-  private lastXRInputAt = 0;
 
   constructor(private readonly root: HTMLElement) {
     this.ui = new UIManager(root, {
@@ -110,7 +109,6 @@ export class AppController {
       this.ui.showXROverlay();
       this.controllerManager.initialize();
       this.controllerManager.setSelectHandler((controller) => void this.handleSelect(controller));
-      this.attachSessionInputFallback(session);
       await this.hitTestManager.initialize(session);
 
       this.activeModule?.dispose();
@@ -126,18 +124,8 @@ export class AppController {
   }
 
   private async handleSelect(controller?: THREE.Object3D): Promise<void> {
-    const now = performance.now();
-    if (now - this.lastXRInputAt < 180) return;
-    this.lastXRInputAt = now;
-
-    if (this.state.mode === "module-running" && this.activeModule) {
-      const handledByObject = controller ? this.activeModule.handleObjectSelect(controller) : false;
-      const handledByStep = handledByObject ? false : this.activeModule.handlePrimaryAction();
-      if (handledByObject || handledByStep) {
-        this.ui.setMessage("Input controller diterima. Langkah praktikum dijalankan.", "success");
-      } else {
-        this.ui.setMessage("Input controller diterima, tetapi belum ada aksi aktif.", "warning");
-      }
+    if (this.state.mode === "module-running" && controller && this.activeModule?.handleObjectSelect(controller)) {
+      this.ui.setMessage("Input controller diterima.", "success");
       return;
     }
 
@@ -153,20 +141,6 @@ export class AppController {
     this.state.setTables(tables);
     this.ui.setMessage(`${table.id.replace("table-", "Meja ")} ditandai. Modul penimbangan dimulai otomatis.`, "success");
     this.startModule("weighing");
-  }
-
-  private attachSessionInputFallback(session: XRSession): void {
-    const handler = () => void this.handleSelect();
-    session.addEventListener("selectstart", handler);
-    session.addEventListener("select", handler);
-    session.addEventListener("squeezestart", handler);
-    session.addEventListener("squeeze", handler);
-    session.addEventListener("end", () => {
-      session.removeEventListener("selectstart", handler);
-      session.removeEventListener("select", handler);
-      session.removeEventListener("squeezestart", handler);
-      session.removeEventListener("squeeze", handler);
-    });
   }
 
   private finishSetup(): void {

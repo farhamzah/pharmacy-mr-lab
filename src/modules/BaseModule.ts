@@ -36,13 +36,6 @@ export abstract class BaseModule {
   abstract start(): void | Promise<void>;
   abstract handleAction(action: string): void;
 
-  handlePrimaryAction(): boolean {
-    const fallbackAction = this.getFallbackControllerAction();
-    if (!fallbackAction) return false;
-    this.handleAction(fallbackAction);
-    return true;
-  }
-
   handleObjectSelect(controller: THREE.Object3D): boolean {
     const origin = new THREE.Vector3();
     const direction = new THREE.Vector3(0, 0, -1);
