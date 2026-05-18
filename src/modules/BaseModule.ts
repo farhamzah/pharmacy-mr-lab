@@ -12,6 +12,7 @@ export abstract class BaseModule {
   protected steps: ModuleStep[] = [];
   protected currentStepIndex = 0;
   private readonly raycaster = new THREE.Raycaster();
+  private readonly hiddenTableGroups: THREE.Group[] = [];
   onStepChanged?: (steps: ModuleStep[]) => void;
   onModuleFinished?: (result: ModuleResult) => void;
 
@@ -24,6 +25,12 @@ export abstract class BaseModule {
     protected readonly camera?: THREE.Camera,
   ) {
     this.scene.add(this.root);
+    this.tables.forEach((table) => {
+      if (table.group.visible) {
+        table.group.visible = false;
+        this.hiddenTableGroups.push(table.group);
+      }
+    });
   }
 
   abstract start(): void | Promise<void>;
@@ -100,6 +107,10 @@ export abstract class BaseModule {
     disposeObject3D(this.root);
     this.scene.remove(this.root);
     this.root.clear();
+    this.hiddenTableGroups.forEach((group) => {
+      group.visible = true;
+    });
+    this.hiddenTableGroups.length = 0;
   }
 
   protected placeOnTable(object: THREE.Object3D, table: LabTable, offset = new THREE.Vector3()): void {
@@ -131,7 +142,7 @@ export abstract class BaseModule {
     const material = new THREE.MeshBasicMaterial({
       color: 0x67e8f9,
       transparent: true,
-      opacity: 0.22,
+      opacity: 0.42,
       depthWrite: false,
     });
     const hotspot = new THREE.Mesh(geometry, material);

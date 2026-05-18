@@ -45,13 +45,13 @@ export class WeighingModule extends BaseModule {
     const scale = await this.factory.createAnalyticalScaleAsync();
     this.scaleGroup = scale;
     const bottle = await this.factory.createIngredientBottleAsync({ label: this.scenario.materialName, color: 0xfbbf24 });
-    bottle.position.set(-0.34, 0, -0.02);
+    bottle.position.set(-0.42, 0, 0.02);
     this.markInteractive(bottle, "Add Small Sample");
     scale.add(bottle);
     this.installScaleInteractions(scale);
     this.placeOnTable(scale, table, new THREE.Vector3(0, 0.02, 0));
     this.faceObjectToUser(scale);
-    this.showGuide("1. Trigger piring timbangan");
+    this.showGuide("1. Arahkan controller ke lingkaran biru di piring");
     this.renderPanel();
   }
 
@@ -72,7 +72,7 @@ export class WeighingModule extends BaseModule {
       animateSuccess(this.weighingBoat);
       this.feedback.success(this.lastFeedback);
       this.completeStep("placeWeighingBoat");
-      this.showGuide("2. Tekan tombol TARE");
+      this.showGuide("2. Trigger tombol TARE / ZERO");
     }
 
     if (action === "Tare / Zero") {
@@ -99,7 +99,7 @@ export class WeighingModule extends BaseModule {
       this.updateMassStatus();
       this.feedback.info(this.lastFeedback);
       this.completeStep("addSample");
-      this.showGuide("4. Atur massa, lalu trigger display");
+      this.showGuide("4. Trigger display besar untuk konfirmasi");
     }
 
     if (action === "Add Large Sample") {
@@ -111,7 +111,7 @@ export class WeighingModule extends BaseModule {
       this.updateMassStatus();
       this.feedback.info(this.lastFeedback);
       this.completeStep("addSample");
-      this.showGuide("4. Atur massa, lalu trigger display");
+      this.showGuide("4. Trigger display besar untuk konfirmasi");
     }
 
     if (action === "Remove Small Sample") {
@@ -141,7 +141,7 @@ export class WeighingModule extends BaseModule {
         animateError(this.scaleGroup);
         this.feedback.error(this.lastFeedback);
       }
-      this.showGuide("5. Trigger Finish jika siap");
+      this.showGuide("5. Trigger lingkaran Finish");
     }
 
     if (action === "Finish") {
@@ -166,7 +166,7 @@ export class WeighingModule extends BaseModule {
       this.scenario.moduleName,
       `${this.scenario.materialName} ${formatGram(this.scenario.targetMassGram)} toleransi +/- ${formatGram(this.scenario.toleranceGram)}`,
       currentStep?.description ?? "Prosedur selesai.",
-      `${this.lastFeedback} Massa: ${formatGram(this.sampleMassGram)}. Gunakan controller ke objek: piring -> TARE -> botol -> display -> Finish.`,
+      `${this.lastFeedback} Massa: ${formatGram(this.sampleMassGram)}. Gunakan trigger controller pada lingkaran biru di alat.`,
       ["Place Weighing Boat", "Tare / Zero", "Add Small Sample", "Remove Small Sample", "Confirm Mass", "Finish"],
       this.steps,
     );
@@ -264,23 +264,46 @@ export class WeighingModule extends BaseModule {
   }
 
   private installScaleInteractions(scale: THREE.Group): void {
-    const plateHotspot = this.createInteractionHotspot("place-boat-hotspot", "Place Weighing Boat", 0.105);
-    plateHotspot.scale.set(1.2, 0.22, 1.2);
-    plateHotspot.position.set(0, 0.18, 0);
+    const plateHotspot = this.createInteractionHotspot("place-boat-hotspot", "Place Weighing Boat", 0.14);
+    plateHotspot.scale.set(1.15, 0.25, 1.15);
+    plateHotspot.position.set(0, 0.2, 0);
     scale.add(plateHotspot);
 
     const tareButton = scale.getObjectByName("tare-button");
     if (tareButton) this.markInteractive(tareButton, "Tare / Zero");
+    const tareLabel = scale.getObjectByName("tare-label");
+    if (tareLabel) this.markInteractive(tareLabel, "Tare / Zero");
+    const tareHotspot = this.createInteractionHotspot("tare-hotspot", "Tare / Zero", 0.075);
+    tareHotspot.position.set(0.205, 0.17, 0.245);
+    scale.add(tareHotspot);
 
     const display = scale.getObjectByName("scale-display-text");
     if (display) this.markInteractive(display, "Confirm Mass");
+    const displayPanel = scale.getObjectByName("scale-display-panel");
+    if (displayPanel) this.markInteractive(displayPanel, "Confirm Mass");
+    const displayHotspot = this.createInteractionHotspot("confirm-display-hotspot", "Confirm Mass", 0.105);
+    displayHotspot.scale.set(1.65, 0.45, 0.35);
+    displayHotspot.position.set(-0.095, 0.155, 0.25);
+    scale.add(displayHotspot);
 
-    const finishHotspot = this.createInteractionHotspot("finish-weighing-hotspot", "Finish", 0.065);
-    finishHotspot.position.set(0.24, 0.18, 0.18);
+    const bottleHotspot = this.createInteractionHotspot("sample-bottle-hotspot", "Add Small Sample", 0.12);
+    bottleHotspot.position.set(-0.42, 0.18, 0.04);
+    scale.add(bottleHotspot);
+
+    const addLabel = this.factory.createSpriteLabel("ADD SAMPLE", 0.22, 0.055);
+    addLabel.position.set(-0.42, 0.34, 0.04);
+    scale.add(addLabel);
+
+    const confirmLabel = this.factory.createSpriteLabel("CONFIRM", 0.18, 0.055);
+    confirmLabel.position.set(-0.095, 0.245, 0.28);
+    scale.add(confirmLabel);
+
+    const finishHotspot = this.createInteractionHotspot("finish-weighing-hotspot", "Finish", 0.09);
+    finishHotspot.position.set(0.31, 0.2, 0.2);
     scale.add(finishHotspot);
 
-    const finishLabel = this.factory.createSpriteLabel("Finish", 0.12, 0.045);
-    finishLabel.position.set(0.24, 0.25, 0.18);
+    const finishLabel = this.factory.createSpriteLabel("FINISH", 0.15, 0.055);
+    finishLabel.position.set(0.31, 0.29, 0.2);
     scale.add(finishLabel);
   }
 
@@ -307,7 +330,7 @@ export class WeighingModule extends BaseModule {
     if (!this.scaleGroup) return;
     animatePowderTransfer(
       this.scaleGroup,
-      new THREE.Vector3(-0.34, 0.28, -0.02),
+      new THREE.Vector3(-0.42, 0.28, 0.02),
       new THREE.Vector3(0, 0.2, 0),
       LabMaterials.powderLightYellow,
     );

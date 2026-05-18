@@ -7,6 +7,7 @@ export class ControllerManager {
   private readonly controllers: THREE.Group[] = [];
   private readonly grips: THREE.Group[] = [];
   private onSelect: SelectHandler = () => undefined;
+  private lastSelectAt = 0;
 
   constructor(private readonly renderer: THREE.WebGLRenderer, private readonly scene: THREE.Scene) {}
 
@@ -14,7 +15,8 @@ export class ControllerManager {
     const modelFactory = new XRControllerModelFactory();
     for (let index = 0; index < 2; index += 1) {
       const controller = this.renderer.xr.getController(index);
-      controller.addEventListener("select", () => this.onSelect(controller));
+      controller.addEventListener("selectstart", () => this.triggerSelect(controller));
+      controller.addEventListener("select", () => this.triggerSelect(controller));
       controller.add(this.createPointerLine());
       this.scene.add(controller);
       this.controllers.push(controller);
@@ -51,5 +53,12 @@ export class ControllerManager {
     line.name = "controller-pointer";
     line.scale.z = 2;
     return line;
+  }
+
+  private triggerSelect(controller: THREE.Group): void {
+    const now = performance.now();
+    if (now - this.lastSelectAt < 180) return;
+    this.lastSelectAt = now;
+    this.onSelect(controller);
   }
 }

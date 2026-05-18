@@ -40,17 +40,17 @@ export class LabObjectFactory {
     group.name = "Analytical Scale";
     group.scale.setScalar(objectScale);
 
-    const base = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.075, 0.34), LabMaterials.warmPlasticWhite);
+    const base = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.085, 0.4), LabMaterials.warmPlasticWhite);
     base.name = "scale-body";
     base.position.y = 0.04;
     group.add(base);
 
-    const baseTop = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.018, 0.26), LabMaterials.plasticWhite);
+    const baseTop = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.018, 0.3), LabMaterials.plasticWhite);
     baseTop.name = "scale-top-inset";
     baseTop.position.set(0, 0.087, -0.02);
     group.add(baseTop);
 
-    const frontLip = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.032, 0.068), LabMaterials.plasticDark);
+    const frontLip = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.04, 0.095), LabMaterials.plasticDark);
     frontLip.name = "scale-control-face";
     frontLip.position.set(0, 0.088, 0.17);
     group.add(frontLip);
@@ -71,46 +71,47 @@ export class LabObjectFactory {
     panRing.position.y = 0.151;
     group.add(panRing);
 
-    const displayPanel = new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.058, 0.018), LabMaterials.plasticDark);
+    const displayPanel = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.08, 0.022), LabMaterials.plasticDark);
     displayPanel.name = "scale-display-panel";
-    displayPanel.position.set(-0.055, 0.098, 0.188);
+    displayPanel.position.set(-0.095, 0.112, 0.225);
     displayPanel.rotation.x = -0.18;
     group.add(displayPanel);
 
-    const display = createTextSprite("0.000 g", { width: 0.17, height: 0.052, fontSize: 42, background: "rgba(3, 7, 18, 0.92)", color: "#67e8f9" });
+    const display = createTextSprite("0.000 g", { width: 0.28, height: 0.085, fontSize: 58, background: "rgba(3, 7, 18, 0.96)", color: "#7dd3fc" });
     display.name = "scale-display-text";
-    display.position.set(-0.055, 0.103, 0.203);
+    display.position.set(-0.095, 0.12, 0.244);
     group.add(display);
 
-    const screenGlow = new THREE.Mesh(new THREE.PlaneGeometry(0.162, 0.043), LabMaterials.screenGreen);
+    const screenGlow = new THREE.Mesh(new THREE.PlaneGeometry(0.27, 0.07), LabMaterials.screenGreen);
     screenGlow.name = "scale-screen-glow";
-    screenGlow.position.set(-0.055, 0.101, 0.199);
+    screenGlow.position.set(-0.095, 0.116, 0.238);
     screenGlow.rotation.x = -0.18;
     screenGlow.material.transparent = true;
     screenGlow.material.opacity = 0.18;
     group.add(screenGlow);
 
-    const tareButton = new THREE.Mesh(new THREE.CylinderGeometry(0.021, 0.021, 0.009, 24), LabMaterials.hologramBlue);
+    const tareButton = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.014, 32), LabMaterials.hologramBlue);
     tareButton.name = "tare-button";
     tareButton.rotation.x = Math.PI / 2;
-    tareButton.position.set(0.14, 0.106, 0.184);
+    tareButton.position.set(0.205, 0.118, 0.222);
     group.add(tareButton);
 
-    const tareLabel = createTextSprite("TARE", { width: 0.075, height: 0.032, fontSize: 26, background: "rgba(15,23,42,0.9)", color: "#e0f2fe" });
-    tareLabel.position.set(0.14, 0.13, 0.205);
+    const tareLabel = createTextSprite("TARE / ZERO", { width: 0.19, height: 0.055, fontSize: 34, background: "rgba(15,23,42,0.96)", color: "#e0f2fe" });
+    tareLabel.name = "tare-label";
+    tareLabel.position.set(0.205, 0.175, 0.25);
     group.add(tareLabel);
 
-    const functionButtons = [-0.19, -0.155, 0.185].map((x) => {
-      const button = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.008, 18), LabMaterials.rubberBlack);
+    const functionButtons = [-0.255, -0.215, 0.275].map((x) => {
+      const button = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.01, 18), LabMaterials.rubberBlack);
       button.rotation.x = Math.PI / 2;
-      button.position.set(x, 0.104, 0.185);
+      button.position.set(x, 0.116, 0.222);
       return button;
     });
     functionButtons.forEach((button) => group.add(button));
 
     const keypadLabels = ["MODE", "CAL", "ON"].map((text, index) => {
-      const label = createTextSprite(text, { width: 0.055, height: 0.026, fontSize: 22, background: "rgba(15,23,42,0.92)", color: "#cbd5e1" });
-      label.position.set([-0.19, -0.155, 0.185][index], 0.128, 0.205);
+      const label = createTextSprite(text, { width: 0.07, height: 0.03, fontSize: 22, background: "rgba(15,23,42,0.94)", color: "#cbd5e1" });
+      label.position.set([-0.255, -0.215, 0.275][index], 0.148, 0.248);
       return label;
     });
     keypadLabels.forEach((label) => group.add(label));
@@ -122,29 +123,29 @@ export class LabObjectFactory {
     const levelBubble = new THREE.Mesh(new THREE.SphereGeometry(0.008, 12, 8), LabMaterials.hologramBlue);
     levelBubble.position.set(0.006, 0, 0.005);
     bubbleLevel.add(levelCase, levelBubble);
-    bubbleLevel.position.set(0.18, 0.105, -0.105);
+    bubbleLevel.position.set(0.235, 0.115, -0.125);
     group.add(bubbleLevel);
 
     const shieldFrameMaterial = LabMaterials.plasticWhite;
-    const shieldBack = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.22, 0.01), LabMaterials.glassTransparent);
+    const shieldBack = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.24, 0.01), LabMaterials.glassTransparent);
     shieldBack.name = "scale-glass-back";
-    shieldBack.position.set(0, 0.245, -0.125);
+    shieldBack.position.set(0, 0.265, -0.145);
     group.add(shieldBack);
-    const shieldLeft = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.22, 0.25), LabMaterials.glassTransparent);
+    const shieldLeft = new THREE.Mesh(new THREE.BoxGeometry(0.01, 0.24, 0.29), LabMaterials.glassTransparent);
     shieldLeft.name = "scale-glass-side";
-    shieldLeft.position.set(-0.17, 0.245, 0);
+    shieldLeft.position.set(-0.19, 0.265, 0);
     group.add(shieldLeft);
     const shieldRight = shieldLeft.clone();
-    shieldRight.position.x = 0.15;
+    shieldRight.position.x = 0.19;
     group.add(shieldRight);
-    const shieldTop = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.01, 0.25), LabMaterials.glassTransparent);
+    const shieldTop = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.01, 0.29), LabMaterials.glassTransparent);
     shieldTop.name = "scale-glass-top";
-    shieldTop.position.set(0, 0.355, 0);
+    shieldTop.position.set(0, 0.385, 0);
     group.add(shieldTop);
 
-    const shieldFrontLeft = new THREE.Mesh(new THREE.BoxGeometry(0.145, 0.18, 0.008), LabMaterials.glassTransparent);
+    const shieldFrontLeft = new THREE.Mesh(new THREE.BoxGeometry(0.165, 0.19, 0.008), LabMaterials.glassTransparent);
     shieldFrontLeft.name = "scale-glass-front-left";
-    shieldFrontLeft.position.set(-0.075, 0.235, 0.126);
+    shieldFrontLeft.position.set(-0.085, 0.255, 0.146);
     group.add(shieldFrontLeft);
     const shieldFrontRight = shieldFrontLeft.clone();
     shieldFrontRight.name = "scale-glass-front-right";
@@ -153,15 +154,15 @@ export class LabObjectFactory {
     [-0.03, 0.03].forEach((x) => {
       const handle = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.06, 0.008), LabMaterials.brushedMetal);
       handle.name = "scale-glass-door-handle";
-      handle.position.set(x, 0.235, 0.136);
+      handle.position.set(x, 0.255, 0.158);
       group.add(handle);
     });
 
     [
-      [-0.175, 0.245, -0.125],
-      [0.175, 0.245, -0.125],
-      [-0.175, 0.245, 0.125],
-      [0.175, 0.245, 0.125],
+      [-0.195, 0.265, -0.145],
+      [0.195, 0.265, -0.145],
+      [-0.195, 0.265, 0.145],
+      [0.195, 0.265, 0.145],
     ].forEach(([x, y, z]) => {
       const post = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.23, 0.012), shieldFrameMaterial);
       post.position.set(x, y, z);
@@ -169,10 +170,10 @@ export class LabObjectFactory {
     });
 
     [
-      [-0.2, -0.13],
-      [0.2, -0.13],
-      [-0.2, 0.13],
-      [0.2, 0.13],
+      [-0.245, -0.155],
+      [0.245, -0.155],
+      [-0.245, 0.155],
+      [0.245, 0.155],
     ].forEach(([x, z]) => {
       const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.032, 0.014, 20), LabMaterials.rubberBlack);
       foot.position.set(x, 0.002, z);
@@ -183,11 +184,11 @@ export class LabObjectFactory {
       group.add(screw);
     });
 
-    const label = createTextSprite("Analytical Balance", { width: 0.3, height: 0.07, fontSize: 36 });
-    label.position.set(0, 0.42, -0.16);
+    const label = createTextSprite("Analytical Balance", { width: 0.34, height: 0.075, fontSize: 38 });
+    label.position.set(0, 0.455, -0.18);
     group.add(label);
-    const brand = createTextSprite("0.1 mg", { width: 0.1, height: 0.035, fontSize: 24, background: "rgba(255,255,255,0.92)", color: "#334155" });
-    brand.position.set(0.08, 0.106, 0.203);
+    const brand = createTextSprite("0.1 mg", { width: 0.1, height: 0.04, fontSize: 26, background: "rgba(255,255,255,0.95)", color: "#334155" });
+    brand.position.set(0.06, 0.15, 0.25);
     group.add(brand);
     return group;
   }
@@ -201,7 +202,7 @@ export class LabObjectFactory {
   updateScaleDisplay(scaleGroup: THREE.Group, massText: string): void {
     const display = scaleGroup.getObjectByName("scale-display-text");
     if (display instanceof THREE.Sprite) {
-      updateTextSprite(display, massText, { width: 0.17, height: 0.052, fontSize: 42, background: "rgba(3, 7, 18, 0.92)", color: "#67e8f9" });
+      updateTextSprite(display, massText, { width: 0.28, height: 0.085, fontSize: 58, background: "rgba(3, 7, 18, 0.96)", color: "#7dd3fc" });
     }
   }
 
@@ -441,7 +442,8 @@ export class LabObjectFactory {
   }
 
   createStatusBadge(text: string, status: StatusType = "info"): THREE.Sprite {
-    const badge = createTextSprite(text, { width: 0.24, height: 0.07, fontSize: 38, status });
+    const width = Math.min(0.68, Math.max(0.24, text.length * 0.018));
+    const badge = createTextSprite(text, { width, height: 0.075, fontSize: 38, status });
     badge.name = "status-badge";
     return badge;
   }
