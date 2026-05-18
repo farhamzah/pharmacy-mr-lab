@@ -56,8 +56,8 @@ export class UIManager {
           <p class="eyebrow">WebXR Demo</p>
           <h1>Laboratorium Farmasi MR</h1>
           <p class="version-badge">Build ${APP_VERSION}</p>
-          <p class="flow-badge">Alur Quest: Trigger 1 Meja, Langsung Timbang</p>
-          <p class="lead">Gunakan Meta Quest Browser untuk mode Mixed Reality. Tandai satu meja, lalu modul penimbangan langsung muncul.</p>
+          <p class="flow-badge">Alur Quest: Pilih Meja dengan Reticle</p>
+          <p class="lead">Gunakan Meta Quest Browser untuk mode Mixed Reality. Arahkan lingkaran ke meja nyata, trigger untuk menyimpan meja, lalu mulai modul.</p>
           <label class="scale-picker">
             <span>Object Scale</span>
             <select id="object-scale">
@@ -207,17 +207,19 @@ export class UIManager {
     const hasTable = tableCount > 0;
     this.instructionPanel?.setContent("Setup Meja", [
       hasTable
-        ? "Meja sudah dipilih. Arahkan controller ke meja itu, lalu tekan trigger untuk meletakkan timbangan."
-        : "Pilih meja kerja dulu. Arahkan controller ke permukaan meja nyata, lalu tekan trigger.",
+        ? `${tableCount} meja tersimpan. Arahkan lingkaran ke meja lain lalu trigger, atau tekan Selesai Setup.`
+        : "Arahkan lingkaran/reticle ke permukaan meja nyata, lalu tekan trigger controller.",
       hasTable
-        ? "Setelah timbangan muncul, ikuti perintah di atas alat: trigger piring, tombol TARE, botol bahan, display, lalu Finish."
-        : "Belum ada timbangan. Tahap pertama hanya memilih meja kerja.",
+        ? "Posisi meja disimpan di tempat lingkaran ditembak. Maksimal 3 meja untuk layout adaptif."
+        : "Meja akan tersimpan tepat di posisi reticle. Ulangi untuk 1 sampai 3 meja.",
     ]);
     if (this.actionEl) {
       this.actionEl.innerHTML = `
-        <button class="primary" disabled>${hasTable ? "Trigger di meja untuk letakkan timbangan" : "Trigger di meja untuk pilih meja"}</button>
-        <span class="action-hint">${hasTable ? "Tahap berikutnya: letakkan timbangan." : "Tahap 1: pilih meja."}</span>
+        <button class="primary" disabled>Arahkan reticle ke meja lalu tekan trigger</button>
+        <button id="finish-setup" ${hasTable ? "" : "disabled"}>Selesai Setup</button>
+        <span class="action-hint">${hasTable ? "Meja tersimpan. Selesaikan setup jika jumlah meja sudah cukup." : "Belum ada meja tersimpan."}</span>
       `;
+      this.actionEl.querySelector("#finish-setup")?.addEventListener("click", this.handlers.onFinishSetup);
     }
   }
 
