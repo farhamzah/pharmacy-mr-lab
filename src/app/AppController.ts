@@ -18,7 +18,7 @@ import { WeighingModule } from "../modules/WeighingModule";
 import { PerformanceMonitor } from "../performance/PerformanceMonitor";
 import { UIManager } from "../ui/UIManager";
 import { getMixingScenario, getWeighingScenario, mixingScenarios, weighingScenarios } from "../data/practicalScenarios";
-import { DEBUG_PERFORMANCE, MAX_TABLES, ModuleId } from "../utils/constants";
+import { DEBUG_PERFORMANCE, ModuleId } from "../utils/constants";
 import { clearResultHistory, clearRoomSetup, createRoomSetupRecord, deleteRoomSetupRecord, loadCurrentRoomSetupRecord, saveRoomSetupRecord } from "../utils/storage";
 import { StateManager } from "./StateManager";
 import { XRSessionManager } from "./XRSessionManager";
@@ -117,7 +117,7 @@ export class AppController {
       this.state.setTables([]);
       this.state.setMode("placement");
       this.ui.showPlacement(0);
-      this.ui.setMessage("Tandai 1 meja kerja. Setelah itu bisa langsung mulai modul tanpa setup 3 meja.");
+      this.ui.setMessage("Tandai satu meja kerja. Setelah trigger pertama, modul penimbangan langsung dimulai.");
     } catch (error) {
       this.ui.setMessage(error instanceof Error ? error.message : "Gagal memulai WebXR.", "error");
     }
@@ -137,12 +137,8 @@ export class AppController {
 
     const tables = this.layout.assignRoles(this.placementManager.getTables());
     this.state.setTables(tables);
-    this.ui.showPlacement(tables.length);
-    this.ui.setMessage(`${table.id.replace("table-", "Meja ")} ditandai. Pilih modul sekarang, atau trigger meja lain kalau ingin tambah meja.`);
-
-    if (tables.length === MAX_TABLES) {
-      this.finishSetup();
-    }
+    this.ui.setMessage(`${table.id.replace("table-", "Meja ")} ditandai. Modul penimbangan dimulai otomatis.`, "success");
+    this.startModule("weighing");
   }
 
   private finishSetup(): void {

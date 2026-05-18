@@ -56,8 +56,8 @@ export class UIManager {
           <p class="eyebrow">WebXR Demo</p>
           <h1>Laboratorium Farmasi MR</h1>
           <p class="version-badge">Build ${APP_VERSION}</p>
-          <p class="flow-badge">Alur Baru: 1 Meja Cukup</p>
-          <p class="lead">Gunakan Meta Quest Browser untuk mode Mixed Reality. Tandai satu meja, lalu langsung mulai modul.</p>
+          <p class="flow-badge">Alur Quest: Trigger 1 Meja, Langsung Timbang</p>
+          <p class="lead">Gunakan Meta Quest Browser untuk mode Mixed Reality. Tandai satu meja, lalu modul penimbangan langsung muncul.</p>
           <label class="scale-picker">
             <span>Object Scale</span>
             <select id="object-scale">
@@ -204,23 +204,17 @@ export class UIManager {
   }
 
   showPlacement(tableCount: number): void {
-    const ready = tableCount > 0;
     this.instructionPanel?.setContent("Setup Meja", [
-      ready
-        ? "ALUR BARU: meja kerja sudah siap. Langsung tekan Mulai Penimbangan atau Mulai Pencampuran. Tidak perlu 3 meja."
-        : "ALUR BARU: arahkan controller ke satu meja kerja nyata, lalu tekan trigger. Satu meja saja cukup untuk mulai.",
-      `Meja aktif: ${tableCount || 0}. Tambah meja hanya opsional untuk ruang praktikum yang punya lebih dari satu meja.`,
+      tableCount > 0
+        ? "Meja ditemukan. Modul penimbangan sedang dimuat."
+        : "ALUR QUEST BARU: arahkan controller ke satu meja kerja nyata, lalu tekan trigger sekali. Tidak ada setup 3 meja.",
+      "Setelah trigger pertama, timbangan dan bahan langsung muncul di meja.",
     ]);
     if (this.actionEl) {
       this.actionEl.innerHTML = `
-        <button id="quick-weighing" class="primary" ${ready ? "" : "disabled"}>Mulai Penimbangan</button>
-        <button id="quick-mixing" ${ready ? "" : "disabled"}>Mulai Pencampuran</button>
-        <button id="finish-setup" ${ready ? "" : "disabled"}>Pilih Skenario Lain</button>
-        <span class="action-hint">Trigger controller hanya untuk tambah meja opsional.</span>
+        <button class="primary" disabled>Arahkan ke meja lalu tekan trigger</button>
+        <span class="action-hint">Satu meja cukup. Modul mulai otomatis.</span>
       `;
-      this.actionEl.querySelector("#quick-weighing")?.addEventListener("click", () => this.handlers.onSelectModule("weighing"));
-      this.actionEl.querySelector("#quick-mixing")?.addEventListener("click", () => this.handlers.onSelectModule("mixing"));
-      this.actionEl.querySelector("#finish-setup")?.addEventListener("click", this.handlers.onFinishSetup);
     }
   }
 
