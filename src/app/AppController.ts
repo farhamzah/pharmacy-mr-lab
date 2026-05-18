@@ -125,12 +125,10 @@ export class AppController {
 
   private async handleSelect(controller?: THREE.Object3D): Promise<void> {
     if (this.state.mode === "module-running" && controller && this.activeModule?.handleObjectSelect(controller)) {
-      this.ui.setMessage("Input controller diterima.", "success");
       return;
     }
 
     if (this.state.mode !== "placement") return;
-    this.ui.setMessage("Input controller diterima. Mencari permukaan meja...", "info");
     const table = await this.placementManager.placeTableFromReticle();
     if (!table) {
       this.ui.setMessage("Reticle belum menemukan permukaan meja atau jumlah meja sudah maksimal.", "error");
@@ -349,7 +347,6 @@ export class AppController {
   }
 
   private render(_timestamp: number, frame?: XRFrame): void {
-    this.controllerManager.updateFromSession(this.xrSessionManager.getSession());
     const referenceSpace = this.xrSessionManager.getReferenceSpace();
     if (frame && referenceSpace && this.state.mode === "placement") {
       this.hitTestManager.update(frame, referenceSpace);
