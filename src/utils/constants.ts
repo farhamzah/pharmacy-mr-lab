@@ -3,7 +3,7 @@ export const TABLE_STORAGE_KEY = "pharmacy-mr-lab.tables.v1";
 export const TARGET_MASS_GRAMS = 0.5;
 export const MASS_TOLERANCE_GRAMS = 0.005;
 export const TARGET_HOMOGENEITY_PERCENT = 90;
-export const APP_VERSION = "0.7.8-object-procedure";
+export const APP_VERSION = "0.7.7-direct-trigger";
 export const DEBUG_PERFORMANCE = false;
 
 export type TableRole =

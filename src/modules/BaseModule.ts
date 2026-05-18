@@ -36,6 +36,13 @@ export abstract class BaseModule {
   abstract start(): void | Promise<void>;
   abstract handleAction(action: string): void;
 
+  handlePrimaryAction(): boolean {
+    const fallbackAction = this.getFallbackControllerAction();
+    if (!fallbackAction) return false;
+    this.handleAction(fallbackAction);
+    return true;
+  }
+
   handleObjectSelect(controller: THREE.Object3D): boolean {
     const origin = new THREE.Vector3();
     const direction = new THREE.Vector3(0, 0, -1);
@@ -49,7 +56,12 @@ export abstract class BaseModule {
       .map((hit) => this.findInteractiveAction(hit.object))
       .find((action): action is string => typeof action === "string" && action.length > 0);
 
-    if (!target) return false;
+    if (!target) {
+      const fallbackAction = this.getFallbackControllerAction();
+      if (!fallbackAction) return false;
+      this.handleAction(fallbackAction);
+      return true;
+    }
     this.handleAction(target);
     return true;
   }
@@ -149,6 +161,10 @@ export abstract class BaseModule {
     hotspot.name = name;
     this.markInteractive(hotspot, action);
     return hotspot;
+  }
+
+  protected getFallbackControllerAction(): string | undefined {
+    return undefined;
   }
 
   private findInteractiveAction(object: THREE.Object3D): string | undefined {

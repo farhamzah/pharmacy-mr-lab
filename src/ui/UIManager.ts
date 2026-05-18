@@ -204,19 +204,16 @@ export class UIManager {
   }
 
   showPlacement(tableCount: number): void {
-    const hasTable = tableCount > 0;
     this.instructionPanel?.setContent("Setup Meja", [
-      hasTable
-        ? "Meja sudah dipilih. Arahkan controller ke meja itu, lalu tekan trigger untuk meletakkan timbangan."
-        : "Pilih meja kerja dulu. Arahkan controller ke permukaan meja nyata, lalu tekan trigger.",
-      hasTable
-        ? "Setelah timbangan muncul, ikuti perintah di atas alat: trigger piring, tombol TARE, botol bahan, display, lalu Finish."
-        : "Belum ada timbangan. Tahap pertama hanya memilih meja kerja.",
+      tableCount > 0
+        ? "Meja ditemukan. Modul penimbangan sedang dimuat."
+        : "ALUR QUEST BARU: arahkan controller ke satu meja kerja nyata, lalu tekan trigger sekali. Tidak ada setup 3 meja.",
+      "Setelah trigger pertama, timbangan dan bahan langsung muncul di meja.",
     ]);
     if (this.actionEl) {
       this.actionEl.innerHTML = `
-        <button class="primary" disabled>${hasTable ? "Trigger di meja untuk letakkan timbangan" : "Trigger di meja untuk pilih meja"}</button>
-        <span class="action-hint">${hasTable ? "Tahap berikutnya: letakkan timbangan." : "Tahap 1: pilih meja."}</span>
+        <button class="primary" disabled>Arahkan ke meja lalu tekan trigger</button>
+        <span class="action-hint">Satu meja cukup. Modul mulai otomatis.</span>
       `;
     }
   }
