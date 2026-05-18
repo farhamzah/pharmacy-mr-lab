@@ -53,7 +53,7 @@ export class WeighingModule extends BaseModule {
     this.placeOnTable(scale, table, new THREE.Vector3(0, 0.02, 0));
     this.faceObjectToUser(scale);
     this.showTargetBadge();
-    this.showGuide("Trigger controller = langkah berikutnya");
+    this.showGuide("1. Trigger piring timbangan untuk pasang boat");
     this.renderPanel();
   }
 
@@ -74,7 +74,7 @@ export class WeighingModule extends BaseModule {
       animateSuccess(this.weighingBoat);
       this.feedback.success(this.lastFeedback);
       this.completeStep("placeWeighingBoat");
-      this.showGuide("Target: lanjut tekan trigger untuk TARE / ZERO");
+      this.showGuide("2. Trigger tombol TARE / ZERO");
     }
 
     if (action === "Tare / Zero") {
@@ -89,7 +89,7 @@ export class WeighingModule extends BaseModule {
       animateScaleReading(this.scaleGroup?.getObjectByName("scale-display-text"));
       this.feedback.success(this.lastFeedback);
       this.completeStep("tareScale");
-      this.showGuide(`Target ${formatGram(this.scenario.targetMassGram)}. Trigger untuk tambah sampel`);
+      this.showGuide(`3. Trigger botol bahan sampai mendekati ${formatGram(this.scenario.targetMassGram)}`);
     }
 
     if (action === "Add Small Sample") {
@@ -101,7 +101,7 @@ export class WeighingModule extends BaseModule {
       this.updateMassStatus();
       this.feedback.info(this.lastFeedback);
       this.completeStep("addSample");
-      this.showGuide(`Target ${formatGram(this.scenario.targetMassGram)}. Trigger untuk konfirmasi massa`);
+      this.showGuide("4. Trigger display timbangan untuk konfirmasi massa");
     }
 
     if (action === "Add Large Sample") {
@@ -113,7 +113,7 @@ export class WeighingModule extends BaseModule {
       this.updateMassStatus();
       this.feedback.info(this.lastFeedback);
       this.completeStep("addSample");
-      this.showGuide(`Target ${formatGram(this.scenario.targetMassGram)}. Trigger untuk konfirmasi massa`);
+      this.showGuide("4. Trigger display timbangan untuk konfirmasi massa");
     }
 
     if (action === "Remove Small Sample") {
@@ -143,7 +143,7 @@ export class WeighingModule extends BaseModule {
         animateError(this.scaleGroup);
         this.feedback.error(this.lastFeedback);
       }
-      this.showGuide("Trigger sekali lagi untuk Finish");
+      this.showGuide("5. Trigger label FINISH");
     }
 
     if (action === "Finish") {
@@ -168,7 +168,7 @@ export class WeighingModule extends BaseModule {
       this.scenario.moduleName,
       `${this.scenario.materialName} ${formatGram(this.scenario.targetMassGram)} toleransi +/- ${formatGram(this.scenario.toleranceGram)}`,
       currentStep?.description ?? "Prosedur selesai.",
-      `Target: ${formatGram(this.scenario.targetMassGram)} (+/- ${formatGram(this.scenario.toleranceGram)}). ${this.lastFeedback} Massa saat ini: ${formatGram(this.sampleMassGram)}. Trigger controller menjalankan langkah berikutnya.`,
+      `Target: ${formatGram(this.scenario.targetMassGram)} (+/- ${formatGram(this.scenario.toleranceGram)}). ${this.lastFeedback} Massa saat ini: ${formatGram(this.sampleMassGram)}. Trigger harus diarahkan ke objek sesuai perintah.`,
       ["Place Weighing Boat", "Tare / Zero", "Add Small Sample", "Remove Small Sample", "Confirm Mass", "Finish"],
       this.steps,
     );
@@ -357,12 +357,4 @@ export class WeighingModule extends BaseModule {
     this.scaleGroup.add(this.statusBadge);
   }
 
-  protected getFallbackControllerAction(): string | undefined {
-    if (!this.hasWeighingBoat) return "Place Weighing Boat";
-    if (!this.hasTared) return "Tare / Zero";
-    if (this.sampleMassGram <= 0) return "Add Small Sample";
-    if (!this.hasConfirmedMass) return "Confirm Mass";
-    if (!this.isFinished) return "Finish";
-    return undefined;
-  }
 }

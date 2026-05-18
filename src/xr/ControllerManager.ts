@@ -5,6 +5,7 @@ type SelectHandler = (controller: THREE.Group) => void;
 
 export class ControllerManager {
   private readonly controllers: THREE.Group[] = [];
+  private readonly controllerRays: THREE.Group[] = [];
   private readonly grips: THREE.Group[] = [];
   private onSelect: SelectHandler = () => undefined;
   private lastSelectAt = 0;
@@ -21,6 +22,7 @@ export class ControllerManager {
       controller.add(this.createPointerLine());
       this.scene.add(controller);
       this.controllers.push(controller);
+      this.controllerRays.push(controller);
 
       const grip = this.renderer.xr.getControllerGrip(index);
       grip.add(modelFactory.createControllerModel(grip));
@@ -55,7 +57,7 @@ export class ControllerManager {
       }
       if (this.pressedSources.has(source)) return;
       this.pressedSources.add(source);
-      this.triggerSelect(this.controllers[index] ?? this.controllers[0]);
+      this.triggerSelect(this.controllerRays[index] ?? this.controllerRays[0] ?? this.controllers[0]);
     });
   }
 
@@ -63,6 +65,7 @@ export class ControllerManager {
     this.controllers.forEach((controller) => this.scene.remove(controller));
     this.grips.forEach((grip) => this.scene.remove(grip));
     this.controllers.length = 0;
+    this.controllerRays.length = 0;
     this.grips.length = 0;
   }
 
