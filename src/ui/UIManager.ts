@@ -54,9 +54,10 @@ export class UIManager {
       <main class="home-shell">
         <section class="home-panel">
           <p class="eyebrow">WebXR Demo</p>
-          <h1>Mixed Reality Pharmacy Lab</h1>
+          <h1>Laboratorium Farmasi MR</h1>
           <p class="version-badge">Build ${APP_VERSION}</p>
-          <p class="lead">Gunakan Meta Quest Browser untuk mode Mixed Reality.</p>
+          <p class="flow-badge">Alur Baru: 1 Meja Cukup</p>
+          <p class="lead">Gunakan Meta Quest Browser untuk mode Mixed Reality. Tandai satu meja, lalu langsung mulai modul.</p>
           <label class="scale-picker">
             <span>Object Scale</span>
             <select id="object-scale">
@@ -70,7 +71,7 @@ export class UIManager {
             <input id="external-assets" type="checkbox" ${externalAssets ? "checked" : ""} />
           </label>
           <div class="button-row">
-            <button id="start-xr" class="primary">Start MR Lab</button>
+            <button id="start-xr" class="primary">Mulai Lab MR</button>
             <button id="desktop-demo">Desktop Module Demo</button>
             <button id="reset-room">Reset Room Setup</button>
           </div>
@@ -206,8 +207,8 @@ export class UIManager {
     const ready = tableCount > 0;
     this.instructionPanel?.setContent("Setup Meja", [
       ready
-        ? "Meja kerja sudah siap. Langsung mulai modul di meja ini, atau trigger permukaan lain jika benar-benar ingin menambah meja."
-        : "Arahkan controller ke satu meja kerja nyata, lalu tekan trigger. Satu meja saja cukup untuk mulai.",
+        ? "ALUR BARU: meja kerja sudah siap. Langsung tekan Mulai Penimbangan atau Mulai Pencampuran. Tidak perlu 3 meja."
+        : "ALUR BARU: arahkan controller ke satu meja kerja nyata, lalu tekan trigger. Satu meja saja cukup untuk mulai.",
       `Meja aktif: ${tableCount || 0}. Tambah meja hanya opsional untuk ruang praktikum yang punya lebih dari satu meja.`,
     ]);
     if (this.actionEl) {

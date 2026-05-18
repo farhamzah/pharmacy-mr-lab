@@ -92,7 +92,8 @@ h2 {
 }
 
 .version-badge,
-.build-badge {
+.build-badge,
+.flow-badge {
   display: inline-flex;
   align-items: center;
   min-height: 30px;
@@ -104,6 +105,12 @@ h2 {
   background: rgba(8, 47, 73, 0.55);
   font-size: 0.86rem;
   font-weight: 800;
+}
+
+.flow-badge {
+  border-color: rgba(134, 239, 172, 0.5);
+  color: #bbf7d0;
+  background: rgba(20, 83, 45, 0.5);
 }
 
 .build-badge {
