@@ -41,6 +41,36 @@ export abstract class BaseModule {
     const direction = new THREE.Vector3(0, 0, -1);
     origin.setFromMatrixPosition(controller.matrixWorld);
     direction.applyQuaternion(controller.getWorldQuaternion(new THREE.Quaternion())).normalize();
+
+    // 1. Check for direct touch / proximity first (very natural for hand tracking)
+    let closestProximityAction: string | undefined;
+    let minDistance = 0.2; // 20cm interaction radius for direct touch
+
+    this.root.traverse((child) => {
+      if (child.userData.moduleAction) {
+        const childPos = new THREE.Vector3();
+        child.getWorldPosition(childPos);
+        
+        // Use bounding sphere or simple distance to center
+        let radius = 0.05;
+        if (child instanceof THREE.Mesh && child.geometry.boundingSphere) {
+           radius = child.geometry.boundingSphere.radius * Math.max(child.scale.x, child.scale.y, child.scale.z);
+        }
+        
+        const dist = origin.distanceTo(childPos) - radius;
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestProximityAction = child.userData.moduleAction;
+        }
+      }
+    });
+
+    if (closestProximityAction) {
+      this.handleAction(closestProximityAction);
+      return true;
+    }
+
+    // 2. Raycast fallback (for pointing at distant objects)
     this.raycaster.set(origin, direction);
     this.raycaster.far = 4;
 
