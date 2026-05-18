@@ -27,7 +27,7 @@ export class XRSessionManager {
 
     this.session = await navigator.xr.requestSession("immersive-ar", {
       requiredFeatures: ["local-floor"],
-      optionalFeatures: ["hit-test", "anchors", "dom-overlay"],
+      optionalFeatures: ["hit-test", "anchors", "dom-overlay", "hand-tracking"],
       domOverlay: { root: document.getElementById("app") ?? document.body },
     });
 

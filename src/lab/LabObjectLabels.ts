@@ -26,7 +26,47 @@ export function updateTextSprite(sprite: THREE.Sprite, text: string, options: Te
   sprite.userData.labelText = text;
 }
 
+export function createTextPlane(text: string, options: TextSpriteOptions = {}): THREE.Mesh {
+  const width = options.width ?? 0.3;
+  const height = options.height ?? 0.095;
+  const geometry = new THREE.PlaneGeometry(width, height);
+  const material = createPlaneMaterial(text, options);
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.userData.labelText = text;
+  mesh.userData.dynamicLabel = true;
+  return mesh;
+}
+
+export function updateTextPlane(mesh: THREE.Mesh, text: string, options: TextSpriteOptions = {}): void {
+  const material = mesh.material;
+  if (material instanceof THREE.MeshBasicMaterial) {
+    material.map?.dispose();
+    material.dispose();
+  }
+  mesh.material = createPlaneMaterial(text, options);
+  mesh.userData.labelText = text;
+}
+
 function createSpriteMaterial(text: string, options: TextSpriteOptions): THREE.SpriteMaterial {
+  const texture = createTextTexture(text, options);
+  const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false });
+  material.userData.dynamicMaterial = true;
+  return material;
+}
+
+function createPlaneMaterial(text: string, options: TextSpriteOptions): THREE.MeshBasicMaterial {
+  const texture = createTextTexture(text, options);
+  const material = new THREE.MeshBasicMaterial({
+    map: texture,
+    transparent: true,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  });
+  material.userData.dynamicMaterial = true;
+  return material;
+}
+
+function createTextTexture(text: string, options: TextSpriteOptions): THREE.CanvasTexture {
   const canvas = document.createElement("canvas");
   canvas.width = 512;
   canvas.height = 160;
@@ -45,9 +85,7 @@ function createSpriteMaterial(text: string, options: TextSpriteOptions): THREE.S
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.userData.dynamicTexture = true;
-  const material = new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false });
-  material.userData.dynamicMaterial = true;
-  return material;
+  return texture;
 }
 
 function roundRect(context: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number, fillStyle: string): void {

@@ -25,6 +25,12 @@ export class ControllerManager {
       grip.add(modelFactory.createControllerModel(grip));
       this.scene.add(grip);
       this.grips.push(grip);
+
+      const hand = this.renderer.xr.getHand(index);
+      hand.addEventListener("selectstart", () => this.triggerSelect(hand));
+      hand.add(this.createHandPointer());
+      this.scene.add(hand);
+      this.controllers.push(hand);
     }
   }
 
@@ -53,6 +59,14 @@ export class ControllerManager {
     line.name = "controller-pointer";
     line.scale.z = 2;
     return line;
+  }
+
+  private createHandPointer(): THREE.Mesh {
+    const geometry = new THREE.SphereGeometry(0.018, 12, 8);
+    const material = new THREE.MeshBasicMaterial({ color: 0x86efac, transparent: true, opacity: 0.72 });
+    const pointer = new THREE.Mesh(geometry, material);
+    pointer.name = "hand-pinch-pointer";
+    return pointer;
   }
 
   private triggerSelect(controller: THREE.Group): void {

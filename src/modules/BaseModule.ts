@@ -49,7 +49,12 @@ export abstract class BaseModule {
       .map((hit) => this.findInteractiveAction(hit.object))
       .find((action): action is string => typeof action === "string" && action.length > 0);
 
-    if (!target) return false;
+    if (!target) {
+      const fallbackAction = this.getFallbackControllerAction();
+      if (!fallbackAction) return false;
+      this.handleAction(fallbackAction);
+      return true;
+    }
     this.handleAction(target);
     return true;
   }
@@ -142,13 +147,17 @@ export abstract class BaseModule {
     const material = new THREE.MeshBasicMaterial({
       color: 0x67e8f9,
       transparent: true,
-      opacity: 0.42,
+      opacity: 0,
       depthWrite: false,
     });
     const hotspot = new THREE.Mesh(geometry, material);
     hotspot.name = name;
     this.markInteractive(hotspot, action);
     return hotspot;
+  }
+
+  protected getFallbackControllerAction(): string | undefined {
+    return undefined;
   }
 
   private findInteractiveAction(object: THREE.Object3D): string | undefined {

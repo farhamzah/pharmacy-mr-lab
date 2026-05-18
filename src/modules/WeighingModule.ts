@@ -51,7 +51,7 @@ export class WeighingModule extends BaseModule {
     this.installScaleInteractions(scale);
     this.placeOnTable(scale, table, new THREE.Vector3(0, 0.02, 0));
     this.faceObjectToUser(scale);
-    this.showGuide("1. Arahkan controller ke lingkaran biru di piring");
+    this.showGuide("1. Tekan trigger untuk pasang weighing boat");
     this.renderPanel();
   }
 
@@ -72,7 +72,7 @@ export class WeighingModule extends BaseModule {
       animateSuccess(this.weighingBoat);
       this.feedback.success(this.lastFeedback);
       this.completeStep("placeWeighingBoat");
-      this.showGuide("2. Trigger tombol TARE / ZERO");
+    this.showGuide("2. Tekan trigger pada tombol TARE / ZERO");
     }
 
     if (action === "Tare / Zero") {
@@ -166,7 +166,7 @@ export class WeighingModule extends BaseModule {
       this.scenario.moduleName,
       `${this.scenario.materialName} ${formatGram(this.scenario.targetMassGram)} toleransi +/- ${formatGram(this.scenario.toleranceGram)}`,
       currentStep?.description ?? "Prosedur selesai.",
-      `${this.lastFeedback} Massa: ${formatGram(this.sampleMassGram)}. Gunakan trigger controller pada lingkaran biru di alat.`,
+      `${this.lastFeedback} Massa: ${formatGram(this.sampleMassGram)}. Gunakan trigger controller mengikuti perintah di atas alat.`,
       ["Place Weighing Boat", "Tare / Zero", "Add Small Sample", "Remove Small Sample", "Confirm Mass", "Finish"],
       this.steps,
     );
@@ -345,5 +345,14 @@ export class WeighingModule extends BaseModule {
     this.statusBadge = this.factory.createStatusBadge(text, status);
     this.statusBadge.position.set(0.18, 0.3, 0.05);
     this.scaleGroup.add(this.statusBadge);
+  }
+
+  protected getFallbackControllerAction(): string | undefined {
+    if (!this.hasWeighingBoat) return "Place Weighing Boat";
+    if (!this.hasTared) return "Tare / Zero";
+    if (this.sampleMassGram <= 0) return "Add Small Sample";
+    if (!this.hasConfirmedMass) return "Confirm Mass";
+    if (!this.isFinished) return "Finish";
+    return undefined;
   }
 }

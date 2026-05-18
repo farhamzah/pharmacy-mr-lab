@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { AssetLoader } from "../assets/AssetLoader";
 import { LabMaterials, PowderMaterialType, StatusType, getPowderMaterial } from "./LabMaterials";
-import { createTextSprite, updateTextSprite } from "./LabObjectLabels";
+import { createTextPlane, createTextSprite, updateTextPlane } from "./LabObjectLabels";
 
 interface ScaleOptions {
   scale?: number;
@@ -77,9 +77,10 @@ export class LabObjectFactory {
     displayPanel.rotation.x = -0.18;
     group.add(displayPanel);
 
-    const display = createTextSprite("0.000 g", { width: 0.28, height: 0.085, fontSize: 58, background: "rgba(3, 7, 18, 0.96)", color: "#7dd3fc" });
+    const display = createTextPlane("0.000 g", { width: 0.28, height: 0.085, fontSize: 58, background: "rgba(3, 7, 18, 0.96)", color: "#7dd3fc" });
     display.name = "scale-display-text";
     display.position.set(-0.095, 0.12, 0.244);
+    display.rotation.x = -0.18;
     group.add(display);
 
     const screenGlow = new THREE.Mesh(new THREE.PlaneGeometry(0.27, 0.07), LabMaterials.screenGreen);
@@ -96,9 +97,10 @@ export class LabObjectFactory {
     tareButton.position.set(0.205, 0.118, 0.222);
     group.add(tareButton);
 
-    const tareLabel = createTextSprite("TARE / ZERO", { width: 0.19, height: 0.055, fontSize: 34, background: "rgba(15,23,42,0.96)", color: "#e0f2fe" });
+    const tareLabel = createTextPlane("TARE / ZERO", { width: 0.19, height: 0.055, fontSize: 34, background: "rgba(15,23,42,0.96)", color: "#e0f2fe" });
     tareLabel.name = "tare-label";
     tareLabel.position.set(0.205, 0.175, 0.25);
+    tareLabel.rotation.x = -0.18;
     group.add(tareLabel);
 
     const functionButtons = [-0.255, -0.215, 0.275].map((x) => {
@@ -110,8 +112,9 @@ export class LabObjectFactory {
     functionButtons.forEach((button) => group.add(button));
 
     const keypadLabels = ["MODE", "CAL", "ON"].map((text, index) => {
-      const label = createTextSprite(text, { width: 0.07, height: 0.03, fontSize: 22, background: "rgba(15,23,42,0.94)", color: "#cbd5e1" });
+      const label = createTextPlane(text, { width: 0.07, height: 0.03, fontSize: 22, background: "rgba(15,23,42,0.94)", color: "#cbd5e1" });
       label.position.set([-0.255, -0.215, 0.275][index], 0.148, 0.248);
+      label.rotation.x = -0.18;
       return label;
     });
     keypadLabels.forEach((label) => group.add(label));
@@ -187,8 +190,9 @@ export class LabObjectFactory {
     const label = createTextSprite("Analytical Balance", { width: 0.34, height: 0.075, fontSize: 38 });
     label.position.set(0, 0.455, -0.18);
     group.add(label);
-    const brand = createTextSprite("0.1 mg", { width: 0.1, height: 0.04, fontSize: 26, background: "rgba(255,255,255,0.95)", color: "#334155" });
+    const brand = createTextPlane("0.1 mg", { width: 0.1, height: 0.04, fontSize: 26, background: "rgba(255,255,255,0.95)", color: "#334155" });
     brand.position.set(0.06, 0.15, 0.25);
+    brand.rotation.x = -0.18;
     group.add(brand);
     return group;
   }
@@ -201,8 +205,8 @@ export class LabObjectFactory {
 
   updateScaleDisplay(scaleGroup: THREE.Group, massText: string): void {
     const display = scaleGroup.getObjectByName("scale-display-text");
-    if (display instanceof THREE.Sprite) {
-      updateTextSprite(display, massText, { width: 0.28, height: 0.085, fontSize: 58, background: "rgba(3, 7, 18, 0.96)", color: "#7dd3fc" });
+    if (display instanceof THREE.Mesh) {
+      updateTextPlane(display, massText, { width: 0.28, height: 0.085, fontSize: 58, background: "rgba(3, 7, 18, 0.96)", color: "#7dd3fc" });
     }
   }
 
@@ -257,13 +261,13 @@ export class LabObjectFactory {
     group.add(mound);
 
     if (options.granules ?? true) {
-      const granuleCount = Math.min(14, Math.max(4, Math.round(amount * 9)));
+      const granuleCount = Math.min(28, Math.max(8, Math.round(amount * 18)));
       for (let i = 0; i < granuleCount; i += 1) {
         const angle = (i / granuleCount) * Math.PI * 2;
-        const radius = 0.018 + (i % 4) * 0.01 * amount;
-        const granule = new THREE.Mesh(new THREE.SphereGeometry(0.006 + (i % 3) * 0.0015, 8, 6), material);
+        const radius = 0.014 + ((i * 7) % 9) * 0.006 * amount;
+        const granule = new THREE.Mesh(new THREE.SphereGeometry(0.0045 + (i % 3) * 0.0012, 8, 6), material);
         granule.name = "powder-granule";
-        granule.position.set(Math.cos(angle) * radius, 0.024 + (i % 2) * 0.003, Math.sin(angle) * radius * 0.75);
+        granule.position.set(Math.cos(angle) * radius, 0.022 + (i % 4) * 0.002, Math.sin(angle) * radius * 0.78);
         group.add(granule);
       }
     }
@@ -343,15 +347,21 @@ export class LabObjectFactory {
     });
     bodyMaterial.userData.dynamicMaterial = true;
 
-    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.064, 0.2, 36), bodyMaterial);
+    const body = new THREE.Mesh(new THREE.CylinderGeometry(0.058, 0.066, 0.22, 40), bodyMaterial);
     body.name = "bottle-body";
     body.position.y = 0.1;
     group.add(body);
 
-    const fill = new THREE.Mesh(new THREE.CylinderGeometry(0.049, 0.057, 0.12, 32), getPowderMaterial(options.color === 0xfca5a5 ? "white" : "yellow"));
+    const fill = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.058, 0.13, 36), getPowderMaterial(options.color === 0xfca5a5 ? "white" : "yellow"));
     fill.name = "bottle-powder-fill";
     fill.position.y = 0.064;
     group.add(fill);
+
+    const fillSurface = this.createPowderMound({ amountNormalized: 0.55, materialType: options.color === 0xfca5a5 ? "white" : "yellow" });
+    fillSurface.name = "bottle-visible-powder-surface";
+    fillSurface.scale.set(0.62, 0.22, 0.62);
+    fillSurface.position.y = 0.135;
+    group.add(fillSurface);
 
     const shoulder = new THREE.Mesh(new THREE.CylinderGeometry(0.034, 0.052, 0.044, 32), bodyMaterial);
     shoulder.name = "bottle-shoulder";
@@ -389,6 +399,11 @@ export class LabObjectFactory {
     const hazard = createTextSprite("LAB", { width: 0.07, height: 0.032, fontSize: 22, background: "rgba(250,204,21,0.94)", color: "#111827" });
     hazard.position.set(0, 0.062, 0.068);
     group.add(hazard);
+    const tamperBand = new THREE.Mesh(new THREE.TorusGeometry(0.039, 0.004, 8, 28), LabMaterials.hologramBlue);
+    tamperBand.name = "bottle-tamper-band";
+    tamperBand.rotation.x = Math.PI / 2;
+    tamperBand.position.y = 0.231;
+    group.add(tamperBand);
     return group;
   }
 
@@ -426,6 +441,10 @@ export class LabObjectFactory {
     lid.position.set(0, 0.153, -0.02);
     lid.rotation.x = 0.35;
     group.add(lid);
+    const bottom = new THREE.Mesh(new THREE.CylinderGeometry(0.066, 0.066, 0.008, 36), LabMaterials.brushedMetal);
+    bottom.name = "final-container-bottom";
+    bottom.position.y = 0.012;
+    group.add(bottom);
     const powder = this.createPowderMound({ amountNormalized: options.amountNormalized ?? 0.75, materialType: "mixed" });
     powder.position.y = 0.05;
     group.add(powder);
