@@ -218,7 +218,7 @@ export class WeighingModule extends BaseModule {
   private async showWeighingBoat(): Promise<void> {
     if (!this.scaleGroup || this.weighingBoat) return;
     this.weighingBoat = await this.factory.createWeighingBoatAsync();
-    this.weighingBoat.position.set(0, 0.11, 0);
+    this.weighingBoat.position.set(0, 0.155, 0);
     this.scaleGroup.add(this.weighingBoat);
   }
 

@@ -46,8 +46,8 @@ export class MixingModule extends BaseModule {
 
     const set = await this.factory.createMortarAndPestleAsync();
     this.mortarSet = set;
-    set.add((await this.factory.createIngredientBottleAsync({ label: "A", color: 0x86efac })).translateX(-0.33));
-    set.add((await this.factory.createIngredientBottleAsync({ label: "B", color: 0xfca5a5 })).translateX(0.34));
+    set.add((await this.factory.createIngredientBottleAsync({ label: this.scenario.ingredientA, color: 0x86efac })).translateX(-0.36));
+    set.add((await this.factory.createIngredientBottleAsync({ label: this.scenario.ingredientB, color: 0xfca5a5 })).translateX(0.36));
 
     this.homogeneityLabel = this.factory.createSpriteLabel("Homogeneity: 0%", 0.34, 0.075);
     this.homogeneityLabel.position.set(0, 0.34, -0.22);

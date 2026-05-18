@@ -2,8 +2,19 @@ import * as THREE from "three";
 
 export const LabMaterials = {
   plasticWhite: new THREE.MeshStandardMaterial({ color: 0xe8eef3, roughness: 0.46, metalness: 0.02 }),
+  warmPlasticWhite: new THREE.MeshStandardMaterial({ color: 0xf4f0e8, roughness: 0.62, metalness: 0.01 }),
   plasticDark: new THREE.MeshStandardMaterial({ color: 0x263241, roughness: 0.58, metalness: 0.02 }),
+  rubberBlack: new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.78, metalness: 0.01 }),
   metal: new THREE.MeshStandardMaterial({ color: 0xb9c3cc, roughness: 0.24, metalness: 0.55 }),
+  brushedMetal: new THREE.MeshStandardMaterial({ color: 0xd1d5db, roughness: 0.18, metalness: 0.72 }),
+  amberGlass: new THREE.MeshPhysicalMaterial({
+    color: 0xb7791f,
+    roughness: 0.16,
+    metalness: 0,
+    transparent: true,
+    opacity: 0.68,
+    depthWrite: false,
+  }),
   glassTransparent: new THREE.MeshPhysicalMaterial({
     color: 0xc7f9ff,
     roughness: 0.08,
