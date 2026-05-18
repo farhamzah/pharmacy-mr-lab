@@ -1,4 +1,4 @@
-import { ModuleId } from "../utils/constants";
+import { APP_VERSION, ModuleId } from "../utils/constants";
 import { ModuleResult } from "../assessment/ModuleResult";
 import { ModuleStep } from "../modules/ModuleStep";
 import { DiagnosticReport } from "../diagnostics/WebXRDiagnostics";
@@ -55,6 +55,7 @@ export class UIManager {
         <section class="home-panel">
           <p class="eyebrow">WebXR Demo</p>
           <h1>Mixed Reality Pharmacy Lab</h1>
+          <p class="version-badge">Build ${APP_VERSION}</p>
           <p class="lead">Gunakan Meta Quest Browser untuk mode Mixed Reality.</p>
           <label class="scale-picker">
             <span>Object Scale</span>
@@ -177,6 +178,7 @@ export class UIManager {
   showXROverlay(): void {
     this.root.innerHTML = `
       <div class="xr-overlay">
+        <div class="build-badge">Build ${APP_VERSION}</div>
         <section id="instruction" class="overlay-panel"></section>
         <section id="progress" class="progress-panel"></section>
         <section id="actions" class="action-panel"></section>

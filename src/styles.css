@@ -91,6 +91,30 @@ h2 {
   line-height: 1.55;
 }
 
+.version-badge,
+.build-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  margin-top: 12px;
+  border: 1px solid rgba(103, 232, 249, 0.45);
+  border-radius: 8px;
+  padding: 4px 10px;
+  color: #bae6fd;
+  background: rgba(8, 47, 73, 0.55);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.build-badge {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 20;
+  margin: 0;
+  pointer-events: none;
+}
+
 .button-row,
 .action-panel {
   display: flex;
