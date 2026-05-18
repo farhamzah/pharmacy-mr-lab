@@ -111,18 +111,13 @@ export class AppController {
       this.controllerManager.setSelectHandler((controller) => void this.handleSelect(controller));
       await this.hitTestManager.initialize(session);
 
-      const persistedTables = this.state.loadPersistedTables();
-      if (persistedTables.length > 0) {
-        this.layout.assignRoles(persistedTables);
-        this.placementManager.addExistingTables(persistedTables);
-        this.finishSetup();
-        this.ui.setMessage("Konfigurasi meja dari localStorage dipulihkan.", "success");
-        return;
-      }
-
+      this.activeModule?.dispose();
+      this.activeModule = null;
+      this.placementManager.clear();
+      this.state.setTables([]);
       this.state.setMode("placement");
       this.ui.showPlacement(0);
-      this.ui.setMessage("Mode placement aktif. Tandai meja pertama, lalu bisa langsung pilih modul atau tambah meja opsional.");
+      this.ui.setMessage("Tandai 1 meja kerja. Setelah itu bisa langsung mulai modul tanpa setup 3 meja.");
     } catch (error) {
       this.ui.setMessage(error instanceof Error ? error.message : "Gagal memulai WebXR.", "error");
     }
@@ -143,7 +138,7 @@ export class AppController {
     const tables = this.layout.assignRoles(this.placementManager.getTables());
     this.state.setTables(tables);
     this.ui.showPlacement(tables.length);
-    this.ui.setMessage(`${table.id.replace("table-", "Meja ")} ditandai. Kamu boleh selesai sekarang atau tambah meja lagi.`);
+    this.ui.setMessage(`${table.id.replace("table-", "Meja ")} ditandai. Pilih modul sekarang, atau trigger meja lain kalau ingin tambah meja.`);
 
     if (tables.length === MAX_TABLES) {
       this.finishSetup();
@@ -166,6 +161,21 @@ export class AppController {
   }
 
   private startModule(moduleId: ModuleId): void {
+    if (this.state.mode === "placement") {
+      const tables = this.layout.assignRoles(this.placementManager.getTables());
+      if (tables.length === 0) {
+        this.ui.setMessage("Tandai 1 meja dulu sebelum mulai modul.", "error");
+        return;
+      }
+      this.state.setTables(tables);
+      this.saveCurrentRoomSetup(tables);
+      this.hitTestManager.dispose();
+      this.pendingModuleId = moduleId;
+      this.startScenario(moduleId === "weighing" ? getWeighingScenario().id : getMixingScenario().id);
+      this.ui.setMessage(`Mulai ${moduleId === "weighing" ? "penimbangan" : "pencampuran"} dengan ${tables.length} meja.`, "success");
+      return;
+    }
+
     this.pendingModuleId = moduleId;
     this.ui.showScenarioSelection(moduleId, moduleId === "weighing" ? weighingScenarios : mixingScenarios);
   }

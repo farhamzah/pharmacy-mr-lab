@@ -65,6 +65,12 @@ export class LabObjectFactory {
     plate.position.y = 0.14;
     group.add(plate);
 
+    const panRing = new THREE.Mesh(new THREE.TorusGeometry(0.108, 0.004, 10, 64), LabMaterials.metal);
+    panRing.name = "scale-pan-ring";
+    panRing.rotation.x = Math.PI / 2;
+    panRing.position.y = 0.151;
+    group.add(panRing);
+
     const displayPanel = new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.058, 0.018), LabMaterials.plasticDark);
     displayPanel.name = "scale-display-panel";
     displayPanel.position.set(-0.055, 0.098, 0.188);
@@ -75,6 +81,14 @@ export class LabObjectFactory {
     display.name = "scale-display-text";
     display.position.set(-0.055, 0.103, 0.203);
     group.add(display);
+
+    const screenGlow = new THREE.Mesh(new THREE.PlaneGeometry(0.162, 0.043), LabMaterials.screenGreen);
+    screenGlow.name = "scale-screen-glow";
+    screenGlow.position.set(-0.055, 0.101, 0.199);
+    screenGlow.rotation.x = -0.18;
+    screenGlow.material.transparent = true;
+    screenGlow.material.opacity = 0.18;
+    group.add(screenGlow);
 
     const tareButton = new THREE.Mesh(new THREE.CylinderGeometry(0.021, 0.021, 0.009, 24), LabMaterials.hologramBlue);
     tareButton.name = "tare-button";
@@ -94,6 +108,23 @@ export class LabObjectFactory {
     });
     functionButtons.forEach((button) => group.add(button));
 
+    const keypadLabels = ["MODE", "CAL", "ON"].map((text, index) => {
+      const label = createTextSprite(text, { width: 0.055, height: 0.026, fontSize: 22, background: "rgba(15,23,42,0.92)", color: "#cbd5e1" });
+      label.position.set([-0.19, -0.155, 0.185][index], 0.128, 0.205);
+      return label;
+    });
+    keypadLabels.forEach((label) => group.add(label));
+
+    const bubbleLevel = new THREE.Group();
+    bubbleLevel.name = "spirit-level";
+    const levelCase = new THREE.Mesh(new THREE.CylinderGeometry(0.032, 0.032, 0.006, 32), LabMaterials.glassTransparent);
+    levelCase.rotation.x = Math.PI / 2;
+    const levelBubble = new THREE.Mesh(new THREE.SphereGeometry(0.008, 12, 8), LabMaterials.hologramBlue);
+    levelBubble.position.set(0.006, 0, 0.005);
+    bubbleLevel.add(levelCase, levelBubble);
+    bubbleLevel.position.set(0.18, 0.105, -0.105);
+    group.add(bubbleLevel);
+
     const shieldFrameMaterial = LabMaterials.plasticWhite;
     const shieldBack = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.22, 0.01), LabMaterials.glassTransparent);
     shieldBack.name = "scale-glass-back";
@@ -110,6 +141,21 @@ export class LabObjectFactory {
     shieldTop.name = "scale-glass-top";
     shieldTop.position.set(0, 0.355, 0);
     group.add(shieldTop);
+
+    const shieldFrontLeft = new THREE.Mesh(new THREE.BoxGeometry(0.145, 0.18, 0.008), LabMaterials.glassTransparent);
+    shieldFrontLeft.name = "scale-glass-front-left";
+    shieldFrontLeft.position.set(-0.075, 0.235, 0.126);
+    group.add(shieldFrontLeft);
+    const shieldFrontRight = shieldFrontLeft.clone();
+    shieldFrontRight.name = "scale-glass-front-right";
+    shieldFrontRight.position.x = 0.075;
+    group.add(shieldFrontRight);
+    [-0.03, 0.03].forEach((x) => {
+      const handle = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.06, 0.008), LabMaterials.brushedMetal);
+      handle.name = "scale-glass-door-handle";
+      handle.position.set(x, 0.235, 0.136);
+      group.add(handle);
+    });
 
     [
       [-0.175, 0.245, -0.125],
@@ -131,11 +177,18 @@ export class LabObjectFactory {
       const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.028, 0.032, 0.014, 20), LabMaterials.rubberBlack);
       foot.position.set(x, 0.002, z);
       group.add(foot);
+      const screw = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.018, 20), LabMaterials.brushedMetal);
+      screw.name = "leveling-screw";
+      screw.position.set(x, 0.016, z);
+      group.add(screw);
     });
 
-    const label = createTextSprite("Analytical Scale", { width: 0.27, height: 0.07, fontSize: 36 });
+    const label = createTextSprite("Analytical Balance", { width: 0.3, height: 0.07, fontSize: 36 });
     label.position.set(0, 0.42, -0.16);
     group.add(label);
+    const brand = createTextSprite("0.1 mg", { width: 0.1, height: 0.035, fontSize: 24, background: "rgba(255,255,255,0.92)", color: "#334155" });
+    brand.position.set(0.08, 0.106, 0.203);
+    group.add(brand);
     return group;
   }
 
@@ -221,23 +274,23 @@ export class LabObjectFactory {
     group.name = "Mortar and Pestle";
     group.scale.setScalar(options.scale ?? this.objectScale);
 
-    const mortar = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.105, 0.16, 48, 1, true), LabMaterials.warmPlasticWhite);
+    const mortar = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.105, 0.16, 48, 1, true), LabMaterials.porcelain);
     mortar.name = "mortar-bowl";
     mortar.position.y = 0.095;
     group.add(mortar);
 
-    const innerBowl = new THREE.Mesh(new THREE.CylinderGeometry(0.145, 0.065, 0.125, 48, 1, true), LabMaterials.plasticWhite);
+    const innerBowl = new THREE.Mesh(new THREE.CylinderGeometry(0.145, 0.065, 0.125, 48, 1, true), LabMaterials.porcelainShadow);
     innerBowl.name = "mortar-inner-bowl";
     innerBowl.position.y = 0.108;
     group.add(innerBowl);
 
-    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.014, 14, 48), LabMaterials.warmPlasticWhite);
+    const rim = new THREE.Mesh(new THREE.TorusGeometry(0.18, 0.014, 14, 48), LabMaterials.porcelain);
     rim.name = "mortar-rim";
     rim.rotation.x = Math.PI / 2;
     rim.position.y = 0.18;
     group.add(rim);
 
-    const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.105, 0.12, 0.035, 42), LabMaterials.warmPlasticWhite);
+    const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.105, 0.12, 0.035, 42), LabMaterials.porcelain);
     foot.name = "mortar-foot";
     foot.position.y = 0.02;
     group.add(foot);
@@ -252,9 +305,9 @@ export class LabObjectFactory {
     pestle.name = "pestle";
     pestle.rotation.z = Math.PI / 5;
     pestle.position.set(0.19, 0.17, 0.02);
-    const pestleHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.032, 0.31, 32), LabMaterials.warmPlasticWhite);
+    const pestleHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.032, 0.31, 32), LabMaterials.porcelain);
     pestleHandle.name = "pestle-handle";
-    const pestleHead = new THREE.Mesh(new THREE.SphereGeometry(0.048, 24, 14), LabMaterials.warmPlasticWhite);
+    const pestleHead = new THREE.Mesh(new THREE.SphereGeometry(0.048, 24, 14), LabMaterials.porcelain);
     pestleHead.name = "pestle-grinding-head";
     pestleHead.position.y = -0.17;
     pestleHead.scale.set(1, 0.72, 1);
@@ -294,6 +347,11 @@ export class LabObjectFactory {
     body.position.y = 0.1;
     group.add(body);
 
+    const fill = new THREE.Mesh(new THREE.CylinderGeometry(0.049, 0.057, 0.12, 32), getPowderMaterial(options.color === 0xfca5a5 ? "white" : "yellow"));
+    fill.name = "bottle-powder-fill";
+    fill.position.y = 0.064;
+    group.add(fill);
+
     const shoulder = new THREE.Mesh(new THREE.CylinderGeometry(0.034, 0.052, 0.044, 32), bodyMaterial);
     shoulder.name = "bottle-shoulder";
     shoulder.position.y = 0.22;
@@ -317,9 +375,19 @@ export class LabObjectFactory {
       group.add(ridge);
     }
 
+    for (let i = 0; i < 5; i += 1) {
+      const tick = new THREE.Mesh(new THREE.BoxGeometry(i % 2 === 0 ? 0.032 : 0.02, 0.0025, 0.002), LabMaterials.labelBackground);
+      tick.name = "bottle-graduation";
+      tick.position.set(0.043, 0.045 + i * 0.028, 0.061);
+      group.add(tick);
+    }
+
     const label = createTextSprite(options.label, { width: 0.19, height: 0.07, fontSize: 32, background: "rgba(255,255,255,0.94)", color: "#0f172a" });
     label.position.set(0, 0.115, 0.067);
     group.add(label);
+    const hazard = createTextSprite("LAB", { width: 0.07, height: 0.032, fontSize: 22, background: "rgba(250,204,21,0.94)", color: "#111827" });
+    hazard.position.set(0, 0.062, 0.068);
+    group.add(hazard);
     return group;
   }
 

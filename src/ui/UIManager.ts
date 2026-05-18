@@ -53,7 +53,7 @@ export class UIManager {
     this.root.innerHTML = `
       <main class="home-shell">
         <section class="home-panel">
-          <p class="eyebrow">WebXR Stage 3</p>
+          <p class="eyebrow">WebXR Demo</p>
           <h1>Mixed Reality Pharmacy Lab</h1>
           <p class="lead">Gunakan Meta Quest Browser untuk mode Mixed Reality.</p>
           <label class="scale-picker">
@@ -204,17 +204,19 @@ export class UIManager {
     const ready = tableCount > 0;
     this.instructionPanel?.setContent("Setup Meja", [
       ready
-        ? "Meja sudah ditandai. Tekan tombol selesai untuk langsung memilih modul, atau arahkan controller ke meja lain lalu trigger untuk tambah meja opsional."
-        : "Arahkan controller ke permukaan meja pertama, lalu tekan trigger. Cukup 1 meja untuk mulai demo.",
-      `Meja ditandai: ${tableCount}/3. 1 meja = shared workbench, 2 meja = penimbangan + pencampuran, 3 meja = material + penimbangan + pencampuran.`,
+        ? "Meja kerja sudah siap. Langsung mulai modul di meja ini, atau trigger permukaan lain jika benar-benar ingin menambah meja."
+        : "Arahkan controller ke satu meja kerja nyata, lalu tekan trigger. Satu meja saja cukup untuk mulai.",
+      `Meja aktif: ${tableCount || 0}. Tambah meja hanya opsional untuk ruang praktikum yang punya lebih dari satu meja.`,
     ]);
     if (this.actionEl) {
       this.actionEl.innerHTML = `
-        <button id="finish-setup" class="primary" ${ready ? "" : "disabled"}>
-          ${ready ? `Gunakan ${tableCount} Meja & Pilih Modul` : "Tandai Meja Dulu"}
-        </button>
-        <span class="action-hint">Trigger controller = tambah meja opsional</span>
+        <button id="quick-weighing" class="primary" ${ready ? "" : "disabled"}>Mulai Penimbangan</button>
+        <button id="quick-mixing" ${ready ? "" : "disabled"}>Mulai Pencampuran</button>
+        <button id="finish-setup" ${ready ? "" : "disabled"}>Pilih Skenario Lain</button>
+        <span class="action-hint">Trigger controller hanya untuk tambah meja opsional.</span>
       `;
+      this.actionEl.querySelector("#quick-weighing")?.addEventListener("click", () => this.handlers.onSelectModule("weighing"));
+      this.actionEl.querySelector("#quick-mixing")?.addEventListener("click", () => this.handlers.onSelectModule("mixing"));
       this.actionEl.querySelector("#finish-setup")?.addEventListener("click", this.handlers.onFinishSetup);
     }
   }
