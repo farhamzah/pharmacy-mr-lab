@@ -183,9 +183,9 @@ export class AppController {
     this.state.setMode("module-running");
 
     if (moduleId === "weighing") {
-      this.activeModule = new WeighingModule(this.scene, this.state.tables, this.layout, this.factory, this.ui, getWeighingScenario(scenarioId));
+      this.activeModule = new WeighingModule(this.scene, this.state.tables, this.layout, this.factory, this.ui, getWeighingScenario(scenarioId), this.camera);
     } else {
-      this.activeModule = new MixingModule(this.scene, this.state.tables, this.layout, this.factory, this.ui, getMixingScenario(scenarioId));
+      this.activeModule = new MixingModule(this.scene, this.state.tables, this.layout, this.factory, this.ui, getMixingScenario(scenarioId), this.camera);
     }
 
     void this.activeModule.start();

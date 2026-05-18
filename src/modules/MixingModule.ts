@@ -30,8 +30,8 @@ export class MixingModule extends BaseModule {
   private statusBadge?: THREE.Sprite;
   private lastFeedback = "";
 
-  constructor(scene: ConstructorParameters<typeof BaseModule>[0], tables: ConstructorParameters<typeof BaseModule>[1], layout: ConstructorParameters<typeof BaseModule>[2], factory: ConstructorParameters<typeof BaseModule>[3], ui: ConstructorParameters<typeof BaseModule>[4], scenario?: MixingScenario) {
-    super(scene, tables, layout, factory, ui);
+  constructor(scene: ConstructorParameters<typeof BaseModule>[0], tables: ConstructorParameters<typeof BaseModule>[1], layout: ConstructorParameters<typeof BaseModule>[2], factory: ConstructorParameters<typeof BaseModule>[3], ui: ConstructorParameters<typeof BaseModule>[4], scenario?: MixingScenario, camera?: THREE.Camera) {
+    super(scene, tables, layout, factory, ui, camera);
     this.scenario = scenario ?? getMixingScenario();
   }
 

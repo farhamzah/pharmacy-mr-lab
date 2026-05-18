@@ -25,10 +25,11 @@ export class WeighingModule extends BaseModule {
   private weighingBoat?: THREE.Group;
   private powder?: THREE.Group;
   private statusBadge?: THREE.Sprite;
+  private guideBadge?: THREE.Sprite;
   private lastFeedback = "";
 
-  constructor(scene: ConstructorParameters<typeof BaseModule>[0], tables: ConstructorParameters<typeof BaseModule>[1], layout: ConstructorParameters<typeof BaseModule>[2], factory: ConstructorParameters<typeof BaseModule>[3], ui: ConstructorParameters<typeof BaseModule>[4], scenario?: WeighingScenario) {
-    super(scene, tables, layout, factory, ui);
+  constructor(scene: ConstructorParameters<typeof BaseModule>[0], tables: ConstructorParameters<typeof BaseModule>[1], layout: ConstructorParameters<typeof BaseModule>[2], factory: ConstructorParameters<typeof BaseModule>[3], ui: ConstructorParameters<typeof BaseModule>[4], scenario?: WeighingScenario, camera?: THREE.Camera) {
+    super(scene, tables, layout, factory, ui, camera);
     this.scenario = scenario ?? getWeighingScenario();
   }
 
@@ -49,6 +50,8 @@ export class WeighingModule extends BaseModule {
     scale.add(bottle);
     this.installScaleInteractions(scale);
     this.placeOnTable(scale, table, new THREE.Vector3(0, 0.02, 0));
+    this.faceObjectToUser(scale);
+    this.showGuide("1. Trigger piring timbangan");
     this.renderPanel();
   }
 
@@ -69,6 +72,7 @@ export class WeighingModule extends BaseModule {
       animateSuccess(this.weighingBoat);
       this.feedback.success(this.lastFeedback);
       this.completeStep("placeWeighingBoat");
+      this.showGuide("2. Tekan tombol TARE");
     }
 
     if (action === "Tare / Zero") {
@@ -83,6 +87,7 @@ export class WeighingModule extends BaseModule {
       animateScaleReading(this.scaleGroup?.getObjectByName("scale-display-text"));
       this.feedback.success(this.lastFeedback);
       this.completeStep("tareScale");
+      this.showGuide("3. Trigger botol bahan");
     }
 
     if (action === "Add Small Sample") {
@@ -94,6 +99,7 @@ export class WeighingModule extends BaseModule {
       this.updateMassStatus();
       this.feedback.info(this.lastFeedback);
       this.completeStep("addSample");
+      this.showGuide("4. Atur massa, lalu trigger display");
     }
 
     if (action === "Add Large Sample") {
@@ -105,6 +111,7 @@ export class WeighingModule extends BaseModule {
       this.updateMassStatus();
       this.feedback.info(this.lastFeedback);
       this.completeStep("addSample");
+      this.showGuide("4. Atur massa, lalu trigger display");
     }
 
     if (action === "Remove Small Sample") {
@@ -134,6 +141,7 @@ export class WeighingModule extends BaseModule {
         animateError(this.scaleGroup);
         this.feedback.error(this.lastFeedback);
       }
+      this.showGuide("5. Trigger Finish jika siap");
     }
 
     if (action === "Finish") {
@@ -158,8 +166,8 @@ export class WeighingModule extends BaseModule {
       this.scenario.moduleName,
       `${this.scenario.materialName} ${formatGram(this.scenario.targetMassGram)} toleransi +/- ${formatGram(this.scenario.toleranceGram)}`,
       currentStep?.description ?? "Prosedur selesai.",
-      `${this.lastFeedback} Massa: ${formatGram(this.sampleMassGram)}. Quest: trigger plate untuk boat, tombol TARE untuk zero, botol untuk tambah sampel, boat untuk kurangi, display untuk confirm.`,
-      ["Place Weighing Boat", "Tare / Zero", "Add Small Sample", "Add Large Sample", "Remove Small Sample", "Confirm Mass", "Finish"],
+      `${this.lastFeedback} Massa: ${formatGram(this.sampleMassGram)}. Gunakan controller ke objek: piring -> TARE -> botol -> display -> Finish.`,
+      ["Place Weighing Boat", "Tare / Zero", "Add Small Sample", "Remove Small Sample", "Confirm Mass", "Finish"],
       this.steps,
     );
   }
@@ -274,6 +282,14 @@ export class WeighingModule extends BaseModule {
     const finishLabel = this.factory.createSpriteLabel("Finish", 0.12, 0.045);
     finishLabel.position.set(0.24, 0.25, 0.18);
     scale.add(finishLabel);
+  }
+
+  private showGuide(text: string): void {
+    if (!this.scaleGroup) return;
+    if (this.guideBadge) this.scaleGroup.remove(this.guideBadge);
+    this.guideBadge = this.factory.createStatusBadge(text, "info");
+    this.guideBadge.position.set(0, 0.5, 0.02);
+    this.scaleGroup.add(this.guideBadge);
   }
 
   private updateMassStatus(): void {

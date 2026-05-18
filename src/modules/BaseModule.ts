@@ -21,6 +21,7 @@ export abstract class BaseModule {
     protected readonly layout: LabLayoutManager,
     protected readonly factory: LabObjectFactory,
     protected readonly ui: UIManager,
+    protected readonly camera?: THREE.Camera,
   ) {
     this.scene.add(this.root);
   }
@@ -104,7 +105,18 @@ export abstract class BaseModule {
   protected placeOnTable(object: THREE.Object3D, table: LabTable, offset = new THREE.Vector3()): void {
     object.position.copy(table.group.position).add(offset);
     object.rotation.copy(table.group.rotation);
+    this.faceObjectToUser(object);
     this.root.add(object);
+  }
+
+  protected faceObjectToUser(object: THREE.Object3D): void {
+    if (!this.camera) return;
+    const cameraPosition = new THREE.Vector3();
+    this.camera.getWorldPosition(cameraPosition);
+    const dx = cameraPosition.x - object.position.x;
+    const dz = cameraPosition.z - object.position.z;
+    if (Math.abs(dx) + Math.abs(dz) < 0.001) return;
+    object.rotation.set(0, Math.atan2(dx, dz), 0);
   }
 
   protected markInteractive(object: THREE.Object3D, action: string): void {
